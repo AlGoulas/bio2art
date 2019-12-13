@@ -84,7 +84,7 @@ def bio2art_from_list(path_to_connectome_folder, file):
     return W        
 
 
-def bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND=None, SeedNeurons=None, intrinsic_wei=0.8):
+def bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND=None, SeedNeurons=None, intrinsic_conn=True, intrinsic_wei=0.8):
     
     import numpy as np
     #import csv
@@ -116,13 +116,13 @@ def bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND=None, SeedNeu
     
     index_neurons = [i for i in range(int(all_neurons))]
     index_neurons = np.asarray(index_neurons)
-    index_neurons = index_neurons + 1
+    #index_neurons = index_neurons + 1
     
     #Create a list of lists that tracks the neuron ids that each region 
     #contains
     
     Region_Neuron_Ids=[]
-    start = 1
+    start = 0
     
     for i in range(C.shape[0]):
         offset = Nr_Neurons[i]
@@ -136,27 +136,54 @@ def bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND=None, SeedNeu
     
     #Rescale the weights so that the outgoing strength of each regions
     #is equal to 1
-    #sum_C_out = np.sum(C, 0)
+    sum_C_out = np.sum(C, 0)
     #C_Norm = C / sum_C_out
     
     #Initiate the neuron to neuron connectivity matrix
-    C_Neurons = np.zeros(int(all_neurons), int(all_neurons))
+    C_Neurons = np.zeros((int(all_neurons), int(all_neurons)))
+    
+    #The not_zeros index marks the regions with which the current region i
+    #is connected to. What needs to be done is conencting the respective 
+    #neurons constrained in the regions.
+    #We use the Region_Neuron_Ids and the weight value of the region-to-region
+    #matrix C.
     
     #Start populating by row of the region-to region matrix C
     for i in range(C.shape[0]):
         not_zeros = np.where(C[i,:] > 0)
+        not_zeros = not_zeros[0]
+        #Get the neuron source indexes
+        sources_indexes = Region_Neuron_Ids[i]
         
-        #The not_zeros index marks the regions with which the current region i
-        #is connected to. What needs to be done is conencting the respective 
-        #neurons constrained in the regions.
-        #We use the Region_Neuron_Ids and the weight value of the region-to-region
-        #matrix C.
+        if(intrinsic_conn == True):
+            #Add an intrinsic within region weight by interconencting all the 
+            #neurons that belong to one region
+            
+            #Intrinsic weight of within region - default 80%
+            intrinsic_weight = (intrinsic_wei * sum_C_out[i]) / (1-intrinsic_wei) 
+            C_Neurons[sources_indexes, sources_indexes] = intrinsic_weight
+        
+        #Loop through the not zeros indexes and fetch the target neuron 
+        #Ids that are stored in Region_Neuron_Ids
+        for target in range(len(not_zeros)):
+            target_indexes = Region_Neuron_Ids[not_zeros[target]]
+            
+            #Calculate here the strength of connectivity that should be 
+            #assigned to the neuron-to-neuron matrix.
+            #
+            #The weight is dictated by the number of source and target neurons
+            #and the respective region-to-region weight of matrix C
+            
+            current_weight = C[i, not_zeros[target]]
+            
+            neuron_to_neuron_weight = int(np.round(current_weight / (len(sources_indexes)*len(target_indexes))))
+            
+            #Populate the matrix with broadcasting of indexes
+            for sources in range(len(sources_indexes)):
+                C_Neurons[sources_indexes[sources], target_indexes] = neuron_to_neuron_weight
+                
     
-    #Intrinsic weight of within region - default 80%
-    intrinsic_weight = (intrinsic_wei * sum_C_out[0]) / (1-intrinsic_wei) 
-    
-    
-    return C, Nr_Neurons, Region_Neuron_Ids
+    return C, C_Neurons, Region_Neuron_Ids
     
 
 #Convert connectome to matrix     
@@ -171,5 +198,5 @@ path_to_connectome_folder = Path("/Users/alexandrosgoulas/Data/work-stuff/python
 file_conn = "ConnectivityMatrix_AbsNrNeurons.npy"
 file_ND = "NeuronalDensity.npy"
 
-C, NrNeurons, Region_Neuron_Ids = bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND, 100)
+C, C_Neurons, Region_Neuron_Ids = bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND, 100, False)
       
