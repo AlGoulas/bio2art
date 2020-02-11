@@ -294,7 +294,7 @@ def evaluate_performance(predicted, actual, discard=0, low=0., high=1.):
     return err, err_null_random, actual, predicted, predicted_rand
 
 
-def evaluate_performance_3D(predicted, actual, discard=0):
+def evaluate_performance_3D(predicted, actual, pattern_length, discard=0):
     
     if discard > 0:
         #Remember that predictions are 3D with:
@@ -309,8 +309,8 @@ def evaluate_performance_3D(predicted, actual, discard=0):
         
     for tr in range(0, predicted.shape[0]):
         
-        trial_predicted = predicted[tr, :, :]
-        trial_actual = actual[tr, :, :]
+        trial_predicted = predicted[tr, (pattern_length+1):, :]
+        trial_actual = actual[tr, (pattern_length+1):, :]
         
         if all_trials_predicted is None:
             
@@ -503,6 +503,10 @@ output_trials_test_3D = Convert_Patterns_to_3D(output_trials_test,
 weight_reservoire_high = 1.
 weight_reservoire_low = -1.
 
+spectral_radius= .95
+
+leak_rate = 0.2
+
 #Biological topology reservoire
 from pathlib import Path
 
@@ -518,8 +522,8 @@ C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
     ND=None, 
-    SeedNeurons=600, 
-    intrinsic_conn=True, 
+    SeedNeurons=50, 
+    intrinsic_conn=False, 
     target_sparsity=0.1
     )
 
@@ -575,8 +579,8 @@ esn = ESNPredictive(
     n_outputs=1,
     n_reservoir=n_reservoir,
     W=W,
-    spectral_radius=1.,
-    leak_rate=.6,
+    spectral_radius=spectral_radius,
+    leak_rate=leak_rate,
     n_transient=n_transient,
     teacher_forcing=False,
     activation=relu,
@@ -594,11 +598,11 @@ prediction_test = esn.predict(input_trials_test)
 #use the same output argument for the random and bio reservoir
 #that is: err_null_random, predicted_rand
 
-err_r, err_null_random, actual, predicted, predicted_rand = evaluate_performance(prediction_test, 
-                                                                        output_trials_test, 
-                                                                        low=0.,
-                                                                        high=1.,
-                                                                        discard=n_transient)
+err_r, err_null_random, actual_r, predicted_r, predicted_rand = evaluate_performance(prediction_test, 
+                                                                                     output_trials_test, 
+                                                                                     low=0.,
+                                                                                     high=1.,
+                                                                                     discard=n_transient)
 
 #Compute the error with the null mean trial predictor as well.
 
@@ -609,15 +613,15 @@ mean_trial_predictor = get_mean_of_trials(input_trials_train,
 
 #from sklearn.metrics import mean_squared_error
     
-err_null_mean = mean_squared_error(actual, mean_trial_predictor)
+err_null_mean = mean_squared_error(actual_r, mean_trial_predictor)
 
 
 
 #Plot some trials
 plot_trials([1,10,100], 
             pattern_length, 
-            actual,
-            predicted,
+            actual_r,
+            predicted_r,
             predicted_rand,
             mean_trial_predictor)
 
@@ -627,8 +631,8 @@ esn = ESNPredictive(
     n_outputs=1,
     n_reservoir=n_reservoir,
     W=C_Neurons,
-    spectral_radius=1.,
-    leak_rate=.6,
+    spectral_radius=spectral_radius,
+    leak_rate=leak_rate,
     n_transient=n_transient,
     teacher_forcing=False,
     activation=relu,
@@ -642,19 +646,20 @@ esn.fit(input_trials_train, output_trials_train)
 
 prediction_test = esn.predict(input_trials_test)
 
-err_bio, err_null_random, actual, predicted, predicted_rand = evaluate_performance(prediction_test, 
-                                                                        output_trials_test, 
-                                                                        low=0.,
-                                                                        high=1.,
-                                                                        discard=n_transient)
-
-
+err_bio, err_null_random, actual_bio, predicted_bio, predicted_rand = evaluate_performance(prediction_test, 
+                                                                                           output_trials_test, 
+                                                                                           low=0.,
+                                                                                           high=1.,
+                                                                                           discard=n_transient)
+#Not needed since it is the same: input trial are the same for r and bio 
+#reservoirs
+#err_null_mean = mean_squared_error(actual_bio, mean_trial_predictor)
 
 #Plot some trials
 plot_trials([1,10,100], 
             pattern_length, 
-            actual,
-            predicted,
+            actual_bio,
+            predicted_bio,
             predicted_rand,
             mean_trial_predictor)
 
@@ -669,10 +674,18 @@ from keras.layers import SimpleRNN, Dense
 
 model = Sequential()
 
+# model.add(Dense(2,
+#                 activation="relu",
+#                 input_shape=(None, 2)
+#                 )
+#           )
+
 model.add(SimpleRNN(10, 
-                    activation="relu",
                     input_shape=(None, 2),
-                    return_sequences=True))
+                    activation="relu",
+                    return_sequences=True
+                    )
+          )
 
 model.add(Dense(1))
 
@@ -708,6 +721,21 @@ prediction_RNN = model.predict(input_trials_test_3D,
                               verbose=1)
 
 #Evaluate the performance
+err_keras_rnn, actual_keras_rnn, predicted_keras_rnn = evaluate_performance_3D(prediction_RNN, 
+                                                                               output_trials_test_3D,
+                                                                               pattern_length)
 
-err_keras_rnn, actual, predicted = evaluate_performance_3D(prediction_RNN, 
-                                                           output_trials_test_3D)
+predicted_keras_rnn = np.reshape(predicted_keras_rnn, 
+                                 (predicted_keras_rnn.shape[0] * predicted_keras_rnn.shape[1], ), 
+                                 order='F')
+
+actual_keras_rnn = np.reshape(actual_keras_rnn, 
+                                 (actual_keras_rnn.shape[0] * actual_keras_rnn.shape[1], ), 
+                                 order='F')
+
+plot_trials([1,10,100], 
+            pattern_length, 
+            actual_keras_rnn,
+            predicted_keras_rnn,
+            predicted_rand,
+            mean_trial_predictor)
