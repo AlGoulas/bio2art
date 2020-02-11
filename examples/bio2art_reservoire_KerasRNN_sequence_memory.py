@@ -299,8 +299,8 @@ def evaluate_performance_3D(predicted, actual, pattern_length, discard=0):
     if discard > 0:
         #Remember that predictions are 3D with:
         #[trials, time_steps(pattern_length), features] 
-        actual = actual[discard:,:,:]
-        predicted = predicted[discard:,:,:]
+        actual = actual[discard:, :, :]
+        predicted = predicted[discard:, :, :]
     
     #Loop through 1st dim to get trials
     
@@ -505,7 +505,7 @@ weight_reservoire_low = -1.
 
 spectral_radius= .95
 
-leak_rate = 0.2
+leak_rate = 0.4
 
 #Biological topology reservoire
 from pathlib import Path
@@ -522,7 +522,7 @@ C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
     ND=None, 
-    SeedNeurons=50, 
+    SeedNeurons=100, 
     intrinsic_conn=False, 
     target_sparsity=0.1
     )
@@ -723,14 +723,15 @@ prediction_RNN = model.predict(input_trials_test_3D,
 #Evaluate the performance
 err_keras_rnn, actual_keras_rnn, predicted_keras_rnn = evaluate_performance_3D(prediction_RNN, 
                                                                                output_trials_test_3D,
-                                                                               pattern_length)
+                                                                               pattern_length,
+                                                                               trials_out)
 
 predicted_keras_rnn = np.reshape(predicted_keras_rnn, 
-                                 (predicted_keras_rnn.shape[0] * predicted_keras_rnn.shape[1], ), 
+                                 (predicted_keras_rnn.shape[0] * predicted_keras_rnn.shape[1], 1), 
                                  order='F')
 
 actual_keras_rnn = np.reshape(actual_keras_rnn, 
-                                 (actual_keras_rnn.shape[0] * actual_keras_rnn.shape[1], ), 
+                                 (actual_keras_rnn.shape[0] * actual_keras_rnn.shape[1], 1), 
                                  order='F')
 
 plot_trials([1,10,100], 
