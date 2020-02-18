@@ -1,40 +1,33 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Feb  6 13:23:00 2020
+import numpy as np
+import csv
 
-@author: alexandrosgoulas
-"""
+# A set of functions for converting biological neuronal networks to artificial
+# neuronal networks. The output is a conenctivity matrix (2D numpy array) that 
+# can be used in reccurent neuronal networks (e.g., echo state networks).
 
-#A set of functions for converting biological neuronal networks to artificial
-#neuronal networks. The output is a conenctivity matrix (2D numpy array) that 
-#can be used in reccurent neuronal networks (e.g., echo state networks).
-
-#Function that simply reads a csv file and returns the matrix that constitutes
-#the neuronal network
-
+# Function that simply reads a csv file and returns the matrix that constitutes
+# the neuronal network
+ 
 def bio2art_from_list(path_to_connectome_folder, file):
 
-    #Generate matrix W from scv file
-    #
-    #input:
-    #path_to_connectome_folder: the path to the folder with the csv file
-    #file: the name of the csv file
-    #
-    #output:
-    #W: the connectivity matrix in the form of a numpy array
+    """
+    Generate matrix W from scv file
     
-    import numpy as np
-    import csv
+    input:
+    path_to_connectome_folder: the path to the folder with the csv file
+    file: the name of the csv file
+    
+    output:
+    W: the connectivity matrix in the form of a numpy array
+    
+    """
     
     file_to_open = path_to_connectome_folder / file
     
-    #Lists to save the name of the neurons
-    #It will be needed to convert the csv fiel to an adjacency matrix
-    
-    #from_list = []
-    #to_list = []
-    
+    # Lists to save the name of the neurons
+    # It will be needed to convert the csv fiel to an adjacency matrix    
     all_neuron_names = []
     
     from_indexes_list =[]
@@ -86,11 +79,11 @@ def bio2art_from_list(path_to_connectome_folder, file):
                     to_indexes_list.append(len(all_neuron_names)-1)    
                     
                 
-                #Irrespective of the above conditions the value of the connection
-                #is stored in its respective list
+                # Irrespective of the above conditions the value of the connection
+                # is stored in its respective list
                 value_connection_list.append(float(row[len(row)-2]))
                 
-    #Build the connectivity matrix
+    # Build the connectivity matrix
     W = np.zeros((len(all_neuron_names), len(all_neuron_names))) 
     
     for i in range(len(to_indexes_list)-1):
@@ -98,64 +91,63 @@ def bio2art_from_list(path_to_connectome_folder, file):
         
     return W        
 
-#Function that constructs a conenctivity matrix C_Neurons with the topology 
-#that is dictted by biological neuronal networks.     
+# Function that constructs a conenctivity matrix C_Neurons with the topology 
+# that is dictted by biological neuronal networks.     
 
 def bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND=None, SeedNeurons=100, intrinsic_conn=True, target_sparsity=0.2, intrinsic_wei=0.8):
     
-    #Generate matrix C_Neurons from a biological connectome
-    #
-    #input:
-    #path_to_connectome_folder: the path to the folder with connectome files
-    #
-    #file: string with the name of the connectome file of the connectome you 
-    #would like to use. Currently available:
-    #C_Drosophila.npy                 49x49 (shape of the npy array)
-    #C_Human_Betzel_Normalized.npy    57x57 
-    #C_Macaque_Normalized.npy         29x29
-    #C_Marmoset_Normalized.npy        55x55
-    #C_Mouse_Gamanut_Normalized.npy   19x19
-    #C_Mouse_Ypma_Oh.npy              56x56
-    #
-    #ND: numpy array of size N where N C.shape[0] with C the actual biological
-    #connectome (above). Each entry of ND[i] is denoting the number of neurons 
-    #that we assume to inhabit region i. ND by default gets populated with 1s. 
-    #Note that each entry of ND is normalized as proportion over the sum(ND)
-    #
-    #SeedNeurons: Integer denotign the nr of neurons that will be multiplied 
-    #by ND[i] to result in the number of neurons to be considered
-    #for each region i. Default 100.
-    #
-    #intrinsic_conn: Boolean denoting if the within regions neuron-to-neuron
-    #conenctivity will be generated. Note that currently all-to-all
-    #within region conenctions are assumed and implemented.Default True. 
-    #
-    #target_sparsity: float (0 1] for each source neuron the percentage of all 
-    #possible neuron-targets to form connections with. Note that at least 1 
-    #neuron will function as target in case that the resultign percentage is<1.
-    #This parameter can be used to affect make the sparisty of C_Neurons vary
-    #around the density dictated by the actual biological connectomes.
-    #Default=0.2. 
-    #
-    #intrinsic_wei: float (0 1] denoting the percentage of the weight that 
-    #will be assigned to the intrinsic weights. E.g., 0.8*sum(extrinsic weight)
-    #where sum(extrinsic weight) is the sum of weights of connections from 
-    #region A to all other regions, but A.
-    #
-    #output:
-    #C: The actual biological connectome that was used in the form of a numpy 
-    #array
-    #
-    #C_Neurons: the artificial neuronal network in the form of a numpy array
-    #
-    #Region_Neuron_Ids: A list of list of integers for tracking the neurons of 
-    #the C_Neurons array. Region_Neuron_Ids[1] contains a list with integers
-    #that denote the neurons of region 1 in C_Neurons as 
-    #C_Neurons[Region_Neuron_Ids[1],Region_Neuron_Ids[1]]
+    """
+    Generate matrix C_Neurons from a biological connectome
     
+    input:
+    path_to_connectome_folder: the path to the folder with connectome files
     
-    import numpy as np
-    #import csv
+    file: string with the name of the connectome file of the connectome you 
+    would like to use. Currently available:
+    C_Drosophila.npy                 49x49 (shape of the npy array)
+    C_Human_Betzel_Normalized.npy    57x57 
+    C_Macaque_Normalized.npy         29x29
+    C_Marmoset_Normalized.npy        55x55
+    C_Mouse_Gamanut_Normalized.npy   19x19
+    C_Mouse_Ypma_Oh.npy              56x56
+    
+    ND: numpy array of size N where N C.shape[0] with C the actual biological
+    connectome (above). Each entry of ND[i] is denoting the number of neurons 
+    that we assume to inhabit region i. ND by default gets populated with 1s. 
+    Note that each entry of ND is normalized as proportion over the sum(ND)
+    
+    SeedNeurons: Integer denotign the nr of neurons that will be multiplied 
+    by ND[i] to result in the number of neurons to be considered
+    for each region i. Default 100.
+    
+    intrinsic_conn: Boolean denoting if the within regions neuron-to-neuron
+    conenctivity will be generated. Note that currently all-to-all
+    within region conenctions are assumed and implemented.Default True. 
+    
+    target_sparsity: float (0 1] for each source neuron the percentage of all 
+    possible neuron-targets to form connections with. Note that at least 1 
+    neuron will function as target in case that the resultign percentage is<1.
+    This parameter can be used to affect make the sparisty of C_Neurons vary
+    around the density dictated by the actual biological connectomes.
+    Default=0.2. 
+    
+    intrinsic_wei: float (0 1] denoting the percentage of the weight that 
+    will be assigned to the intrinsic weights. E.g., 0.8*sum(extrinsic weight)
+    where sum(extrinsic weight) is the sum of weights of connections from 
+    region A to all other regions, but A.
+    
+    output:
+    C: The actual biological connectome that was used in the form of a numpy 
+    array
+    
+    C_Neurons: the artificial neuronal network in the form of a numpy array
+    
+    Region_Neuron_Ids: A list of list of integers for tracking the neurons of 
+    the C_Neurons array. Region_Neuron_Ids[1] contains a list with integers
+    that denote the neurons of region 1 in C_Neurons as 
+    C_Neurons[Region_Neuron_Ids[1],Region_Neuron_Ids[1]]
+    
+    """
     
     file_to_open = path_to_connectome_folder / file_conn
     
@@ -294,3 +286,4 @@ def bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND=None, SeedNeu
                 
     
     return C, C_Neurons, Region_Neuron_Ids
+
