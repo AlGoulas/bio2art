@@ -165,8 +165,15 @@ A.-S. Chiang et al. Three-dimensional reconstruction of brain-wide wiring networ
 Mouse Ypma Oh:
 M. Rubinov, R. J. F. Ypma, et al. Wiring cost and topological participation of the mouse brain connectome.Proc. Natl. Acad. Sci. U.S.A. 112,10032–10037 (2015). https://doi.org/10.1073/pnas.1420315112
 
+S.W. Oh et al. A mesoscale connectome of the mouse brain. Nature. 508,207–214 (2014). http://dx.doi.org/10.1038/nature13186
 
+Mouse Gamanut:
+
+R. Gămănuţ et al. The mouse cortical Connectome, characterized by an ultra-dense cortical graph, maintains specificity by distinct connectivity profiles. Neuron. 97, 698-715.e10 https://doi.org/10.1016/j.neuron.2017.12.037
+
+Macaque monkey:
+
+N. T. Markov et al. A weighted and directed interareal connectivity matrix for macaque cerebral cortex. Cereb. Cortex 24,17–36 (2014). https://doi.org/10.1093/cercor/bhs270 
 
 Human:
-A. Goulas, R. F. Betzel, C. C. Hilgetag, Spatiotemporal ontogeny of brain wiring. Sci. Adv.5, eaav9694 (2019)
-
+R. F. Betzel, D. S. Bassett, Specificity and robustness of long-distance connections in weighted, interareal connectomes. Proc. Natl. Acad. Sci. U.S.A. 115, E4880–E4889 (2018). https://doi.org/10.1073/pnas.1720186115 
