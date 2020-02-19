@@ -21,6 +21,13 @@ The constructed artificial recurrent neuronal network is returned as a numpy arr
 
 # Installation
 
+Download or clone the repository and unpack it. Open a terminal and change to the corresponding folder. Type:
+
+´´´
+pip install .
+´´´
+
+
 # Examples
 
 # Citations 
