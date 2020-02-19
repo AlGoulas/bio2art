@@ -58,15 +58,15 @@ ND[:] = 10
 C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
-    ND=None, 
+    ND=ND, 
     SeedNeurons=None, 
     intrinsic_conn=True, 
     target_sparsity=0.1
     )
 ```
-Now the ND parameter is a numpy array and each entry is containing the numnber 10. This means that each region ND[i] consists of 10 neurons, Thus, now the resulting reccurent neuronal network C_Neurons contains 290 neurons (29 regions of the original connectome x 10 neurons per region as we indicated). These neurons are connected based on the topology of the the empirical actual neuronal network. Therefore, C_Neurons is a bioinstantiated eccurent neuronal network, but scaled up to 290 neurons. 
+Now the ND parameter is a numpy array and each entry is containing the numnber 10. This means that each region ND[i] consists of 10 neurons. Thus, now the resulting reccurent neuronal network C_Neurons contains 290 neurons (29 regions of the original connectome x 10 neurons per region as we indicated). These neurons are connected based on the topology of the the empirical actual neuronal network. Therefore, C_Neurons is a bioinstantiated eccurent neuronal network, but scaled up to 290 neurons. 
 
-If we want to assume that regions contain another number of neurons, we jsut simply contruct ND accordingly (e.g., with 20, 34, 1093, etc neurons).
+If we want to assume that regions contain another number of neurons, we just simply contruct ND accordingly (e.g., with 20, 34, 1093 neurons, that is, arbitrary positive integers).
 
 Note that not all region need to contain the same number of neurons. For isntance, we can assume that region 5 contains 40 neurons and the rest of the regions 10 neurons:
 
@@ -78,7 +78,7 @@ ND[4] = 40
 C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
-    ND=None, 
+    ND=ND, 
     SeedNeurons=None, 
     intrinsic_conn=True, 
     target_sparsity=0.1
@@ -86,6 +86,74 @@ C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
 ```
 This means each ND[i] can contain an arbitrary positive integer.
 
+If SeedNeurons is not None, but a positive integer, then the array ND will be scaled such as ND[i]/sum(ND). Subsequently each entry ND, will be multiplied by the SeedNeurons integer. Thus, now each region ND[i] contains ND[i]/sum(ND) * SeedNeurons neurons (actually, the ceil of this number).
 
+For instance, assuming 10 neurons per region and SeedNeurons=100:
 
-# Citations 
+```
+ND=np.zeros(29,)
+ND[:] = 10
+
+C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+    path_to_connectome_folder, 
+    file_conn, 
+    ND=ND, 
+    SeedNeurons=100, 
+    intrinsic_conn=True, 
+    target_sparsity=0.1
+    )
+```
+The reccurent artifical network is now a network containing in total 116 neurons.
+
+Note that if ND=None, then ND[i]=1. Since ND is scaled to the sum(ND), instantiating the artifical reccurent neuronal network with ND=None will result in the exact same output as the example above:  
+
+```
+C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+    path_to_connectome_folder, 
+    file_conn, 
+    ND=None, 
+    SeedNeurons=100, 
+    intrinsic_conn=True, 
+    target_sparsity=0.1
+    )
+```
+The same syntax and parameters are used for instantiating the artifical reccurent neuronal network based on the topology of other empirical biological neuronal network, such as the mouse:
+
+```
+file_conn = "C_Mouse_Ypma_Oh.npy"# the mouse neuronal network 
+
+ND=np.zeros(56,)# this mouse network has 56 regions (see bio2art_from_conn_mat function documentation)
+ND[:] = 10
+
+C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+    path_to_connectome_folder, 
+    file_conn, 
+    ND=ND, 
+    SeedNeurons=None, 
+    intrinsic_conn=True, 
+    target_sparsity=0.1
+    )
+```
+This instantiation results in a reccurent neuronal network C_Neurons that contains 560 neurons (56 regions of the original connectome x 10 neurons per region as we indicated).
+
+# Examples of use in the context of echo state networks
+
+Two examples are included to showcase the use of the Bio2Art conversion in an actual context. Both example focus on a "memory" capacity of the network (both in the "examples" folder).
+
+bio2art_reservoire_lag_memory.py
+
+This example uses an echo state network with random topology and one with a bioinstantiated topology. Given an input sequence, the task is to predict the Nth lag of the sequence.
+
+bio2art_reservoire_sequence_memory.py
+
+This example uses an echo state network with random topology and one with a bioinstantiated topology. The task is a "working memory" task, that is, the network has to memorize a sequence of N numbers and after a "cue" to replay this sequence.
+
+Note that the above examples use the following echo state network implementation:
+https://github.com/fabridamicelli/echoes
+
+However, any echo state network can be used, since the Bio2Art offers as output a reccurent neuronal network in the form of a Numpy array that can be pluged-in as the reccurent network in-between Win and Wout in echo state networks.
+
+Note that the examples can be run with the requirement enlisted in requirements.txt.
+
+# Citations
+
