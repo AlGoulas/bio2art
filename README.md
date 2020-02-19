@@ -26,7 +26,7 @@ Download or clone the repository and unpack it. Open a terminal and change to th
 ```
 pip install .
 ```
-
+Note that the Bio2Art only uses Numpy (tested with numpy==1.16.2). However, to use the examples (see below) further libraries are needed. Therefore, for executing the examples, create a virtual environment (e.g., with conda) with the requirements enlisted in the requirements.txt file in the "examples" folder.  
 
 # Examples
 
