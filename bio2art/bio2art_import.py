@@ -9,7 +9,6 @@ import csv
 
 # Function that simply reads a csv file and returns the matrix that constitutes
 # the neuronal network
- 
 def bio2art_from_list(path_to_connectome_folder, file):
 
     """
@@ -39,20 +38,20 @@ def bio2art_from_list(path_to_connectome_folder, file):
         
         for row in reader:
             
-            #Check if the row contains all data
+            # Check if the row contains all data
             index = [i for i, list_item in enumerate(row) if list_item == ""]
             
-            #If row contains all data, then proceed
+            # If row contains all data, then proceed
             if len(index) == 0:
             
                 from_neuron = row[0]  
                 to_neuron = row[1]
                 
-                #strip the strings from spaces so we do not create duplicates
+                # Strip the strings from spaces so we do not create duplicates
                 from_neuron = from_neuron.strip()
                 to_neuron = to_neuron.strip()
                 
-                #Keep track of all the neuron names in the 
+                # Keep track of all the neuron names in the 
                 index_from = [i for i, list_item in enumerate(all_neuron_names) if list_item == from_neuron]
                 
                 if len(index_from) > 0:
@@ -60,12 +59,12 @@ def bio2art_from_list(path_to_connectome_folder, file):
                     from_indexes_list.append(index_from[0])
                     
                 else:
-                    #If it is not in the from neuron list, added and make the index the 
-                    #len of list AFTER we add the new name
+                    # If it is not in the from neuron list, added and make the index the 
+                    # len of list AFTER we add the new name
                     all_neuron_names.append(from_neuron)
                     from_indexes_list.append(len(all_neuron_names)-1)
                   
-                #Do the same for the to_neuron     
+                # Do the same for the to_neuron     
                 index_to = [i for i, list_item in enumerate(all_neuron_names) if list_item == to_neuron]
                 
                 if len(index_to) > 0:
@@ -93,8 +92,15 @@ def bio2art_from_list(path_to_connectome_folder, file):
 
 # Function that constructs a conenctivity matrix C_Neurons with the topology 
 # that is dictted by biological neuronal networks.     
-
-def bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND=None, SeedNeurons=100, intrinsic_conn=True, target_sparsity=0.2, intrinsic_wei=0.8):
+def bio2art_from_conn_mat(
+        path_to_connectome_folder, 
+        file_conn, 
+        ND=None, 
+        SeedNeurons=None, 
+        intrinsic_conn=True, 
+        target_sparsity=0.2, 
+        intrinsic_wei=0.8
+        ):
     
     """
     Generate matrix C_Neurons from a biological connectome
@@ -111,14 +117,16 @@ def bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND=None, SeedNeu
     C_Mouse_Gamanut_Normalized.npy   19x19
     C_Mouse_Ypma_Oh.npy              56x56
     
-    ND: numpy array of size N where N C.shape[0] with C the actual biological
-    connectome (above). Each entry of ND[i] is denoting the number of neurons 
-    that we assume to inhabit region i. ND by default gets populated with 1s. 
-    Note that each entry of ND is normalized as proportion over the sum(ND)
+    ND: numpy array of positive integers withshape N where N C.shape[0] with C 
+    the actual biological connectome (above). Each entry of ND[i] is denoting 
+    the number of neurons that we assume to inhabit region i. ND by default 
+    gets populated with 1s. Note that if SeedNeurons is not None each entry of 
+    ND will be normalized as proportion over the sum(ND)
     
-    SeedNeurons: Integer denotign the nr of neurons that will be multiplied 
-    by ND[i] to result in the number of neurons to be considered
-    for each region i. Default 100.
+    SeedNeurons: Positive integer denoting the nr of neurons that will be 
+    multiplied by ND[i] to result in the number of neurons to be considered
+    for each region i. Default None. Note that if SeedNeurons, the ND array
+    is not scaled and used as is.
     
     intrinsic_conn: Boolean denoting if the within regions neuron-to-neuron
     conenctivity will be generated. Note that currently all-to-all
@@ -126,7 +134,7 @@ def bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND=None, SeedNeu
     
     target_sparsity: float (0 1] for each source neuron the percentage of all 
     possible neuron-targets to form connections with. Note that at least 1 
-    neuron will function as target in case that the resultign percentage is<1.
+    neuron will function as target in case that the resultign percentage is <1.
     This parameter can be used to affect make the sparisty of C_Neurons vary
     around the density dictated by the actual biological connectomes.
     Default=0.2. 
@@ -151,44 +159,43 @@ def bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND=None, SeedNeu
     
     file_to_open = path_to_connectome_folder / file_conn
     
-    #Read the connectivity matrix - it must be stored as a numpy array
+    # Read the connectivity matrix - it must be stored as a numpy array
     C = np.load(file_to_open)
     
-    #file_to_open = path_to_connectome_folder / file_ND
-    
-    #ND = np.load(file_to_open)
-    
-    #What needs to be done is:
-    #Use the ND vector to create and connect regions containing neurons that 
-    #contain SeedNeurons*ND[i] where ND is the vector specifying the percentage 
-    #of neurons for each region i.
-    
-    if(not(isinstance(ND, np.ndarray))):
+    # What needs to be done is:
+    # Use the ND vector to create and connect regions containing neurons that 
+    # contain SeedNeurons*ND[i] where ND is the vector specifying the 
+    # percentage of neurons for each region i.
+    if ND is None:
         ND=np.ones((C.shape[0],))
-        
-    
+          
     if(ND.shape[0] != C.shape[0]):
         print("Size of ND must be equal to value of connectome:", C.shape[0])
         return
+    
+    # If SeedNeurons is specified, then we scale the ND so that each entry
+    # ND[i] is a percentage over all neurons contained in ND. Then each entry 
+    # is scaled up by getign multiplied by the SeedNeurons. 
+    if SeedNeurons is not None:    
+        sum_ND = np.sum(ND)
+        ND_scaled_sum = ND / sum_ND
+        Nr_Neurons = np.ceil(ND_scaled_sum * SeedNeurons)
+        all_neurons = np.sum(Nr_Neurons)
         
-    sum_ND = np.sum(ND)
-    ND_scaled_sum = ND / sum_ND
+    # If no SeedNeurons is used, then the all_neurons variable is simply 
+    # sum(ND) and the Nr_Neurons to work with is siply the unscaled
+    # ND array as passed as an input argument.    
+    if SeedNeurons is None:
+       all_neurons = np.sum(ND)
+       Nr_Neurons = ND
     
-    #This is how many neurons each region should have
-    Nr_Neurons = np.round(ND_scaled_sum * SeedNeurons)
-    
-    #Construct the neuron to neuron matrix - it is simply an array of unique
-    #integer ids of all the neurons dictated by sum(Nr_Neurons)
-    
-    all_neurons = np.sum(Nr_Neurons)
-    
+    # Construct the neuron to neuron matrix - it is simply an array of unique
+    # integer ids of all the neurons dictated by all_neurons  
     index_neurons = [i for i in range(int(all_neurons))]
     index_neurons = np.asarray(index_neurons)
-    #index_neurons = index_neurons + 1
-    
-    #Create a list of lists that tracks the neuron ids that each region 
-    #contains
-    
+
+    # Create a list of lists that tracks the neuron ids that each region 
+    # contains
     Region_Neuron_Ids=[]
     start = 0
     
@@ -202,88 +209,83 @@ def bio2art_from_conn_mat(path_to_connectome_folder, file_conn, ND=None, SeedNeu
         #Update the indexes
         start = start + offset
     
-    #Rescale the weights so that the outgoing strength of each regions
-    #is equal to 1
+    # Rescale the weights so that the outgoing strength of each regions
+    # is equal to 1
     sum_C_out = np.sum(C, 0)
-    #C_Norm = C / sum_C_out
     
-    #Initiate the neuron to neuron connectivity matrix
+    # Initiate the neuron to neuron connectivity matrix
     C_Neurons = np.zeros((int(all_neurons), int(all_neurons)))
     
-    #The not_zeros index marks the regions with which the current region i
-    #is connected to. What needs to be done is conencting the respective 
-    #neurons constrained in the regions.
-    #We use the Region_Neuron_Ids and the weight value of the region-to-region
-    #matrix C.
+    # The not_zeros index marks the regions with which the current region i
+    # is connected to. What needs to be done is conencting the respective 
+    # neurons constrained in the regions.
+    # We use the Region_Neuron_Ids and the weight value of the region-to-region
+    # matrix C.
     
-    #Start populating by row of the region-to region matrix C
+    # Start populating by row of the region-to region matrix C
     for i in range(C.shape[0]):
         
-        #not-zeros denote the indexes of the areas that are receiving
-        #incoming connections from the current region i 
+        # not-zeros denote the indexes of the areas that are receiving
+        # incoming connections from the current region i 
         not_zeros = np.where(C[i,:] > 0)[0]
-        #not_zeros = not_zeros[0]
-        #Get the neuron source indexes
+     
+        # Get the neuron source indexes
         sources_indexes = Region_Neuron_Ids[i]
         
         if(intrinsic_conn == True):
-            #Add an intrinsic within region weight by interconencting all the 
-            #neurons that belong to one region
+            # Add an intrinsic within region weight by interconencting all the 
+            # neurons that belong to one region
             
-            #Intrinsic weight of within region - default 80%
+            # Intrinsic weight of within region - default 80%
             intrinsic_weight = (intrinsic_wei * sum_C_out[i]) / (1-intrinsic_wei) 
             
-            #Populate the matrix with broadcasting of indexes
+            # Populate the matrix with broadcasting of indexes
             for sources in range(len(sources_indexes)):
                 C_Neurons[sources_indexes[sources], sources_indexes] = intrinsic_weight
             
             
-        #Loop through the not zeros indexes and fetch the target neuron 
-        #Ids that are stored in Region_Neuron_Ids
+        # Loop through the not zeros indexes and fetch the target neuron 
+        # Ids that are stored in Region_Neuron_Ids
         for target in range(len(not_zeros)):
             target_indexes = Region_Neuron_Ids[not_zeros[target]]
             
-            #Calculate here the strength of connectivity that should be 
-            #assigned to the neuron-to-neuron matrix.
-            #
-            #The weight is dictated by the number of source and target neurons
-            #and the respective region-to-region weight of matrix C
-            
+            # Calculate here the strength of connectivity that should be 
+            # assigned to the neuron-to-neuron matrix.
+            # The weight is dictated by the number of source and target neurons
+            # and the respective region-to-region weight of matrix C
             current_weight = C[i, not_zeros[target]]
             
             neuron_to_neuron_weight = current_weight / (len(sources_indexes)*len(target_indexes))
             
-            #For now the neuron-to-neuron weight is identical due to 
-            #lack of the precise number from experimental observations.
-            #It migh be needed to inject soem noise for variations to emerge.
+            # For now the neuron-to-neuron weight is identical due to 
+            # lack of the precise number from experimental observations.
+            # It migh be needed to inject soem noise for variations to emerge.
             
-            #Populate the matrix with broadcasting of indexes
+            # Populate the matrix with broadcasting of indexes
             for sources in range(len(sources_indexes)):
-                #C_Neurons[sources_indexes[sources], target_indexes] = neuron_to_neuron_weight
                 
-                #Here we can control the sparsity of connections by choosing
-                #the portion of all target_indexes to be used.
-                #Hence, apply the target_sparsity parameter
+                # Here we can control the sparsity of connections by choosing
+                # the portion of all target_indexes to be used.
+                # Hence, apply the target_sparsity parameter
                 nr_targets_to_use = target_sparsity*len(target_indexes)
                 
-                #Ensure that we keep at least one target neuron
+                # Ensure that we keep at least one target neuron
                 if nr_targets_to_use < 1:
                     nr_targets_to_use = 1
                 else:
                     nr_targets_to_use = int(np.round(nr_targets_to_use))
                 
-                #Keep random nr_targets_to_use
+                # Keep random nr_targets_to_use
                 target_indexes_to_use = np.random.permutation(len(target_indexes))
                 target_indexes_to_use = target_indexes_to_use[0:nr_targets_to_use]
                 target_indexes = np.asarray(target_indexes)[target_indexes_to_use]            
                 
                 C_Neurons[sources_indexes[sources], target_indexes] = neuron_to_neuron_weight
                 
-            #Remove self-to-self strength/connections
-            #Maybe in the future this can be parametrized as a desired 
-            #feature to be included or not    
+            # Remove self-to-self strength/connections
+            # Maybe in the future this can be parametrized as a desired 
+            # feature to be included or not    
             np.fill_diagonal(C_Neurons, 0.)    
-                
-    
+                   
     return C, C_Neurons, Region_Neuron_Ids
 
