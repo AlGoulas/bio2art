@@ -157,7 +157,7 @@ Note that the examples can be run with the requirement enlisted in requirements.
 
 # Citations
 
-If you use a specific empirical conenctome to instantiated a reccurent artifical network, please cite the follwoign papers:
+Apart from explicitly refering to this repository, certain empirical datsets are used as well. Thus, if you use a specific empirical connectome to instantiated a reccurent artifical network, please cite the following papers:
 
 Fly:
 A.-S. Chiang et al. Three-dimensional reconstruction of brain-wide wiring networks in Drosophila at single-cell resolution.Curr. Biol.21,1–11 (2011) https://doi.org/10.1016/j.cub.2010.11.056
