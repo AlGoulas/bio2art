@@ -136,6 +136,8 @@ C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
 ```
 This instantiation results in a reccurent neuronal network C_Neurons that contains 560 neurons (56 regions of the original connectome x 10 neurons per region as we indicated).
 
+In all of the above examples C is a numpy array that corresponds to the biologicl neuronal networks that was used to construct the artificial neuronal network. Region_Neuron_Ids is a list of lists. Each list in this list includes integers that are the indexes of the neurons contained within a region. For instance, Region_Neuron_Ids[0] will return the indexes of the neurons in C_Neurons that correspond to region 1 in the biological neuronal network C.  
+
 # Examples of use in the context of echo state networks
 
 Two examples are included to showcase the use of the Bio2Art conversion in an actual context. Both example focus on a "memory" capacity of the network (both in the "examples" folder).
