@@ -16,9 +16,11 @@ The Bio2Art offers an easy to use function to convert biological neural networks
 
 Note that the term 'connectome' refers to a biological neural network.
 
-Bio2Art builds artifical recurrent neuronal networks by using the topology dictated by the aforementioned empirical and by extrapolating from the empirical data to scale up the artifical neuronal networks. For instance, if the empirical data correspond to a neuronal network involving 29 brain regions, then the resulting artificial recurrent neuronal network can be scaled up by assuming a certain number of neurons populating each region (see examples below and documentation of the bio2art_import.py function). Thus, the output can be an artificial recurrent neuronal network with an arbitrary number of neurons (e.g., >>29 brain regions), but, importantly this networks obeys the topology of a desired biological neuronal network.   
+Bio2Art builds artifical recurrent neuronal networks by using the topology dictated by the aforementioned empirical neural networks and by extrapolating from the empirical data to scale up the artifical neural networks. 
 
-The constructed artificial recurrent neuronal network is returned as a numpy array and, thus, can be used with virtually any type of artifical recurrent network, for instance, echo state networks.  
+For instance, if the empirical data correspond to a neuronal network involving 29 brain regions, then the resulting artificial recurrent neuronal network can be scaled up by assuming a certain number of neurons populating each region (see examples below and documentation of the bio2art_import.py function). Thus, the output can be an artificial recurrent neuronal network with an arbitrary number of neurons (e.g., >>29 brain regions), but, importantly this networks obeys the topology of a desired biological neuronal network.   
+
+The constructed artificial recurrent neural network is returned as a numpy array and, thus, can be used with virtually any type of artifical recurrent network, for instance, echo state networks.  
 
 # Installation
 
@@ -50,7 +52,9 @@ C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
     target_sparsity=0.1
     )
 ```
-The C_Neurons is the reccurent neuronal network based on the indicated empirical monkey neuronal network. However, since ND=None and SeedNeurons=None, C_Neurons is exactly the same with C, that is, the exact same empirical monkey neuronal network. Not very useful. Let's see how the ND and SeedNeurons parameters can help us scale up the reccurent neuronal network while we stay faithful to the topology of the empirical neuronal network (here, the macaque monkey).
+The C_Neurons is the reccurent neuronal network based on the indicated empirical monkey neuronal network. However, since ND=None and SeedNeurons=None, C_Neurons is exactly the same with C, that is, the exact same empirical monkey neuronal network. Not very useful. Let's see how we can create something more meaningful and helpful. 
+
+The ND and SeedNeurons parameters can help us scale up the reccurent neuronal network while we stay faithful to the topology of the empirical neuronal network (here, the macaque monkey).
 
 ```
 ND=np.zeros(29,)
