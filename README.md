@@ -6,7 +6,8 @@ recurrent neural networks based on the topology dictated by empirical connectome
 
 # Description
 
-The Bio2Art offers an easy to use function to convert biological neuronal networks to artificial recurrent neuronal networks. To this end, empirical neuronal networks of diverse species are used. Currently, the neuronal networks of the following species can be used:
+The Bio2Art offers an easy to use function to convert biological neural networks to artificial recurrent neural networks. To this end, empirical neural networks of diverse species are used. Currently, the neural networks of the following species can be used:
+
 1. Macaque monkey (Macaca mulatta)
 2. Marmoset monkey (Callithrix jacchus)
 3. Mouse (Mus musculus)
@@ -21,7 +22,7 @@ The constructed artificial recurrent neuronal network is returned as a numpy arr
 
 # Installation
 
-Download or clone the repository and unpack it. Open a terminal and change to the corresponding folder. Type:
+Download or clone the repository. Open a terminal and change to the corresponding folder. Type:
 
 ```
 pip install .
@@ -30,7 +31,7 @@ Note that the Bio2Art only uses Numpy (tested with numpy==1.16.2). However, to u
 
 # Examples
 
-Converting the macaque monkey neuronal network to a recurrent artifical neuronal network.
+Converting the macaque monkey neural network to a recurrent artifical neural network.
 
 ```
 import bio2art_import as b2a # import Bio2Art function bio2art_import 
