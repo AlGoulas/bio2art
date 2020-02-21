@@ -1,6 +1,5 @@
 # Bio2Art
-Convert biological neural networks to artificial neural networks by creating 
-recurrent neural networks based on the topology dictated by empirical connectomes.
+Convert biological neural networks to recurrent neural networks based on the topology dictated by the empirical biological networks.
 
 ![bio_and_art_connectomes](bio_and_art_connectomes.png)
 
