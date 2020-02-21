@@ -18,7 +18,7 @@ Note that the term 'connectome' refers to a biological neural network.
 
 Bio2Art builds artifical recurrent neuronal networks by using the topology dictated by the aforementioned empirical neural networks and by extrapolating from the empirical data to scale up the artifical neural networks. 
 
-For instance, if the empirical data correspond to a neuronal network involving 29 brain regions, then the resulting artificial recurrent neuronal network can be scaled up by assuming a certain number of neurons populating each region (see examples below and documentation of the bio2art_import.py function). Thus, the output can be an artificial recurrent neuronal network with an arbitrary number of neurons (e.g., >>29 brain regions), but, importantly this networks obeys the topology of a desired biological neuronal network.   
+For instance, if the empirical data correspond to a neural network involving 29 brain regions, then the resulting artificial recurrent neural network can be scaled up by assuming a certain number of neurons populating each region (see examples below and documentation of the bio2art_import.py function). Thus, the output can be an artificial recurrent neural network with an arbitrary number of neurons (e.g., >>29 brain regions), but, importantly this networks obeys the topology of a desired biological neural network.   
 
 The constructed artificial recurrent neural network is returned as a numpy array and, thus, can be used with virtually any type of artifical recurrent network, for instance, echo state networks.  
 
@@ -29,7 +29,7 @@ Download or clone the repository. Open a terminal and change to the correspondin
 ```
 pip install .
 ```
-Note that the Bio2Art only uses Numpy (tested with numpy==1.16.2). However, to use the examples (see below), further libraries are needed. Therefore, for executing the examples, create a virtual environment (e.g., with conda) with the requirements enlisted in the requirements.txt file in the "examples" folder.  
+Note that the Bio2Art only uses numpy (tested with numpy==1.16.2). However, to use the examples (see below), further libraries are needed. Therefore, for executing the examples, create a virtual environment (e.g., with conda) with the requirements enlisted in the requirements.txt file in the "examples" folder.  
 
 # Examples
 
@@ -52,9 +52,9 @@ C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
     target_sparsity=0.1
     )
 ```
-The C_Neurons is the reccurent neuronal network based on the indicated empirical monkey neuronal network. However, since ND=None and SeedNeurons=None, C_Neurons is exactly the same with C, that is, the exact same empirical monkey neuronal network. Not very useful. Let's see how we can create something more meaningful and helpful. 
+The C_Neurons is the reccurent neural network based on the indicated empirical monkey neuronal network. However, since ND=None and SeedNeurons=None, C_Neurons is exactly the same with C, that is, the exact same empirical monkey neural network. Not very useful. Let's see how we can create something more meaningful and helpful. 
 
-The ND and SeedNeurons parameters can help us scale up the reccurent neuronal network while we stay faithful to the topology of the empirical neuronal network (here, the macaque monkey).
+The ND and SeedNeurons parameters can help us scale up the reccurent neural network while we stay faithful to the topology of the empirical neural network (here, the macaque monkey).
 
 ```
 ND=np.zeros(29,)
@@ -69,11 +69,11 @@ C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
     target_sparsity=0.1
     )
 ```
-Now the ND parameter is a numpy array and each entry is containing the numnber 10. This means that each region ND[i] consists of 10 neurons. Thus, now the resulting reccurent neuronal network C_Neurons contains 290 neurons (29 regions of the original connectome x 10 neurons per region as we indicated). These neurons are connected based on the topology of the the empirical actual neuronal network. Therefore, C_Neurons is a bioinstantiated eccurent neuronal network, but scaled up to 290 neurons. 
+Now the ND parameter is a numpy array and each entry is containing the number 10. This means that each region ND[i] consists of 10 neurons. Thus, now the resulting reccurent neural network C_Neurons contains 290 neurons (29 regions of the original connectome x 10 neurons per region as we indicated). These neurons are connected based on the topology of the the actual empirical neural network. Therefore, C_Neurons is a bioinstantiated reccurent neural network, but scaled up to 290 neurons. 
 
-If we want to assume that regions contain another number of neurons, we just simply contruct ND accordingly (e.g., with 20, 34, 1093 neurons, that is, arbitrary positive integers).
+If we want to assume that regions contain another number of neurons, we just simply construct ND accordingly (e.g., with 20, 34, 1093 neurons, that is, arbitrary positive integers).
 
-Note that not all region need to contain the same number of neurons. For isntance, we can assume that region 5 contains 40 neurons and the rest of the regions 10 neurons:
+Note that not all regions need to contain the same number of neurons. For instance, we can assume that region 5 contains 40 neurons and the rest of the regions 10 neurons:
 
 ```
 ND=np.zeros(29,)
@@ -108,9 +108,9 @@ C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
     target_sparsity=0.1
     )
 ```
-The reccurent artifical network is now a network containing in total 116 neurons.
+The reccurent artifical neural network is now a network containing in total 116 neurons.
 
-Note that if ND=None, then ND[i]=1. Since ND is scaled to the sum(ND), instantiating the artifical reccurent neuronal network with ND=None will result in the exact same output as the example above:  
+Note that if ND=None, then ND[i]=1. Since ND is scaled to the sum(ND), instantiating the artifical reccurent neural network with ND=None will result in the exact same output as the example above:  
 
 ```
 C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
@@ -122,7 +122,7 @@ C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
     target_sparsity=0.1
     )
 ```
-The same syntax and parameters are used for instantiating the artifical reccurent neuronal network based on the topology of other empirical biological neuronal network, such as the mouse:
+The same syntax and parameters are used for isntantiating the artifical reccurent neural network based on the topology of other empirical biological neural network, such as the mouse:
 
 ```
 file_conn = "C_Mouse_Ypma_Oh.npy"# the mouse neuronal network 
@@ -139,9 +139,9 @@ C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
     target_sparsity=0.1
     )
 ```
-This instantiation results in a reccurent neuronal network C_Neurons that contains 560 neurons (56 regions of the original connectome x 10 neurons per region as we indicated).
+This instantiation results in a reccurent neural network C_Neurons that contains 560 neurons (56 regions of the original connectome x 10 neurons per region as we indicated).
 
-In all of the above examples C is a numpy array that corresponds to the biologicl neuronal networks that was used to construct the artificial neuronal network. Region_Neuron_Ids is a list of lists. Each list in this list includes integers that are the indexes of the neurons contained within a region. For instance, Region_Neuron_Ids[0] will return the indexes of the neurons in C_Neurons that correspond to region 1 in the biological neuronal network C.  
+In all of the above examples C is a numpy array that corresponds to the biological neural network that was used to construct the artificial neural network. Region_Neuron_Ids is a list of lists. Each list in this list includes integers that are the indexes of the neurons contained within a region. For instance, Region_Neuron_Ids[0] will return the indexes of the neurons in C_Neurons that correspond to region 1 in the biological neural network C.  
 
 # Examples of use in the context of echo state networks
 
@@ -158,13 +158,13 @@ This example uses an echo state network with random topology and one with a bioi
 Note that the above examples use the following echo state network implementation:
 https://github.com/fabridamicelli/echoes
 
-However, any echo state network can be used, since the Bio2Art offers as output a reccurent neuronal network in the form of a Numpy array that can be pluged-in as the reccurent network in-between Win and Wout in echo state networks.
+However, any echo state network can be used, since the Bio2Art offers as output a reccurent neural network in the form of a Numpy array that can be pluged-in as the reccurent network in-between Win and Wout in echo state networks.
 
-Note that the examples can be run with the requirement enlisted in requirements.txt.
+Note that the examples can be run with the requirements enlisted in requirements.txt.
 
 # Citations
 
-Apart from explicitly refering to this repository, certain empirical datsets are used as well. Thus, if you use a specific empirical connectome to instantiated a reccurent artifical network, please cite the following papers:
+Apart from explicitly refering to this repository, certain empirical datasets are used as well. Thus, if you use a specific empirical connectome to instantiate a reccurent artifical neural network, please cite the following papers:
 
 Fly:
 A.-S. Chiang et al. Three-dimensional reconstruction of brain-wide wiring networks in Drosophila at single-cell resolution.Curr. Biol.21,1–11 (2011) https://doi.org/10.1016/j.cub.2010.11.056
