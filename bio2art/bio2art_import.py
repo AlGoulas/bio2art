@@ -99,7 +99,8 @@ def bio2art_from_conn_mat(
         SeedNeurons=None, 
         intrinsic_conn=True, 
         target_sparsity=0.2, 
-        intrinsic_wei=0.8
+        intrinsic_wei=0.8,
+        keep_diag=True
         ):
     
     """
@@ -125,17 +126,17 @@ def bio2art_from_conn_mat(
     
     SeedNeurons: Positive integer denoting the nr of neurons that will be 
     multiplied by ND[i] to result in the number of neurons to be considered
-    for each region i. Default None. Note that if SeedNeurons, the ND array
+    for each region i. Default None. Note that if SeedNeurons=None, the ND array
     is not scaled and used as is.
     
     intrinsic_conn: Boolean denoting if the within regions neuron-to-neuron
     conenctivity will be generated. Note that currently all-to-all
-    within region conenctions are assumed and implemented.Default True. 
+    within region conenctions are assumed and implemented. Default True. 
     
     target_sparsity: float (0 1] for each source neuron the percentage of all 
     possible neuron-targets to form connections with. Note that at least 1 
-    neuron will function as target in case that the resultign percentage is <1.
-    This parameter can be used to affect make the sparisty of C_Neurons vary
+    neuron will function as target in case that the resulting percentage is <1.
+    This parameter can be used to make the sparisty of C_Neurons vary
     around the density dictated by the actual biological connectomes.
     Default=0.2. 
     
@@ -143,6 +144,10 @@ def bio2art_from_conn_mat(
     will be assigned to the intrinsic weights. E.g., 0.8*sum(extrinsic weight)
     where sum(extrinsic weight) is the sum of weights of connections from 
     region A to all other regions, but A.
+    
+    keep_diag: Boolean variable denoting if the diagonal entries (denoting 
+    self-to-self neuron connections) should be kept of or not. Default True. 
+    Note that this parameter only has an effect  when intrinsic_conn is True.
     
     output:
     C: The actual biological connectome that was used in the form of a numpy 
@@ -282,10 +287,10 @@ def bio2art_from_conn_mat(
                 
                 C_Neurons[sources_indexes[sources], target_indexes] = neuron_to_neuron_weight
                 
-            # Remove self-to-self strength/connections
-            # Maybe in the future this can be parametrized as a desired 
-            # feature to be included or not    
-            np.fill_diagonal(C_Neurons, 0.)    
+    # Remove self-to-self strength/connections (diagonal of C_Neurons) 
+    if keep_diag is False:    
+        np.fill_diagonal(C_Neurons, 0.)    
                    
     return C, C_Neurons, Region_Neuron_Ids
+
 
