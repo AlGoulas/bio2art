@@ -8,7 +8,7 @@ import seaborn as sns
 from sklearn.metrics import mean_squared_error
 
 from echoes import ESNPredictive
-import bio2art_import as b2a
+from bio2art import bio2art_import
 
 sns.set(context="notebook", style="whitegrid", font_scale=1.4, 
         rc={'grid.linestyle': '--', 
@@ -285,19 +285,20 @@ weight_reservoire_low = -1.
 
 # Biological topology reservoire
 # Specify here the folder where your connectomes are contained 
-path_to_connectome_folder = Path("/Users/alexandrosgoulas/Bio2Art/connectomes/")
+path_to_connectome_folder = Path("/Users/alexandrosgoulas/Data/work-stuff/python-code/development/Bio2Art/connectomes/")
 
 # Specify here the connectome that we will use. In this example we use the
 # macaque monkey connectome. 
 file_conn = "C_Macaque_Normalized.npy"
 
-C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+net_oring, net_rescaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
-    ND=None, 
-    SeedNeurons=600, 
+    neuron_density=None, 
+    seed_neurons=600, 
     intrinsic_conn=True, 
-    target_sparsity=0.1
+    target_sparsity=0.1,
+    keep_diag=False
     )
 
 # What we retouch for the bio2art network is W. To this end, get the unique 
@@ -305,12 +306,12 @@ C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
 # the actual weights of the C_Neurons
 
 # Get the indexes for the non zero elements of C_Neurons
-non_zero_C_Neurons = np.where(C_Neurons != 0)
+non_zero_net_rescaled = np.where(net_rescaled != 0)
 
-x_non_zero_C_Neurons = non_zero_C_Neurons[0]
-y_non_zero_C_Neurons = non_zero_C_Neurons[1]
+x_non_zero_net_rescaled = non_zero_net_rescaled[0]
+y_non_zero_net_rescaled = non_zero_net_rescaled[1]
 
-rand_indexes_of_non_zeros = np.random.permutation(len(x_non_zero_C_Neurons))
+rand_indexes_of_non_zeros = np.random.permutation(len(x_non_zero_net_rescaled))
 
 indexes_for_unique1 = int(np.floor(len(rand_indexes_of_non_zeros)/2))
 
@@ -319,14 +320,14 @@ indexes_for_unique1 = int(np.floor(len(rand_indexes_of_non_zeros)/2))
 trials_out = 20
 n_transient = ((pattern_length*2)+1)*trials_out
 
-n_reservoir = C_Neurons.shape[0]
+n_reservoir = net_rescaled.shape[0]
 
 W = np.random.uniform(weight_reservoire_low, 
                       weight_reservoire_high, 
                       [n_reservoir, n_reservoir])
 
 # Equate density of random and bio topology reservoirs
-density_for_reservoir = density_matrix(C_Neurons)
+density_for_reservoir = density_matrix(net_rescaled)
 W = threshold_matrix(W, density_for_reservoir)
 
 # Fill in the weights of the bio reservoire with the exact values used for 
@@ -334,8 +335,8 @@ W = threshold_matrix(W, density_for_reservoir)
 weights_random_reservoire = W[np.where(W != 0)]
 
 # Assign them to the topology of the bio resevoire
-bio_weights_index = np.where(C_Neurons != 0)
-C_Neurons[bio_weights_index] = weights_random_reservoire
+bio_weights_index = np.where(net_rescaled != 0)
+net_rescaled[bio_weights_index] = weights_random_reservoire
 
 # Train and test on the random reservoire
 esn = ESNPredictive(
@@ -388,7 +389,7 @@ esn = ESNPredictive(
     n_inputs=2,
     n_outputs=1,
     n_reservoir=n_reservoir,
-    W=C_Neurons,
+    W=net_rescaled,
     spectral_radius=1.,
     leak_rate=.6,
     n_transient=n_transient,
