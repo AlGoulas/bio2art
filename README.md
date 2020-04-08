@@ -92,6 +92,28 @@ net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
 ```
 This means each neuron_density[i] can contain an arbitrary positive integer. The total number of neurons, and thus, shape of net_scaled is for this example [320, 320].
 
+Note that the parameter target_sparsity is a float (0 1] and controls for each source neuron the percentage of all possible neuron-targets to form connections with. Note that at least 1 neuron will function as target in case that the resulting percentage result in less than 1 neuron. This parameter can be used to make the sparsity of network_scaled vary around the density dictated by the actual biological connectomes. Default=0.2. Note that this parameter is meaningful only if at least on region has more than 1 neuron, that is, for some i, neuron_density[i]>1.
+
+In such cases, the sparsity of network_scaled is affected by the parameter target_sparsity. For instance in the example above, the density of network_scaled (=0.1025) corresponds to 10468 connections.
+
+If target_sparsity=0.8 as in the example below:
+
+```
+neuron_density=np.zeros(29,)
+neuron_density[:] = 10
+neuron_density[4] = 40
+
+net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
+    path_to_connectome_folder, 
+    file_conn, 
+    neuron_density=neuron_density, 
+    seed_neurons=None, 
+    intrinsic_conn=True, 
+    target_sparsity=0.8
+    )
+```
+then the density of network_scaled becomes higher(=0.2730) corresponding to 27868 connections for net_scaled. Note that density of a network is the percentage of existing connections over the number of possible connections (given the shape of the array representing it, that is, network_scaled in this example). 
+
 If seed_neurons is not None, but a positive integer, then the array neuron_density will be scaled such as neuron_density[i]/sum(neuron_density). Subsequently each entry neuron_density, will be multiplied by the seed_neurons integer. Thus, now each region neuron_density[i] contains neuron_density[i]/sum(neuron_density). This is derived from the following relation: neuron_density[i]/sum(neuron_density) * seed_neurons (actually, the ceil of this number, since we cannot have non-integer number of neurons in a region).
 
 For instance, assuming 10 neurons per region and seed_neurons=100:
