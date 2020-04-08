@@ -31,6 +31,7 @@ pip install .
 Note that the Bio2Art only uses numpy (tested with numpy==1.16.2). However, to use the examples (see below), further libraries are needed. Therefore, for executing the examples, create a virtual environment (e.g., with conda) with the requirements enlisted in the requirements.txt file in the "examples" folder.  
 
 # Examples
+Please see the documentation of the bio2art_import.bio2art_from_conn_mat function for a detailed description of the parameters used below. The use of the parameters and their impact is highlighted in the following examples.  
 
 Converting the macaque monkey neural network to a recurrent artifical neural network.
 
