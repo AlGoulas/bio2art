@@ -39,7 +39,7 @@ from bio2art import bio2art_import # import Bio2Art function bio2art_import
 from pathlib import Path
 
 # path to where the "connectomes" folder is located (it is included with the current repository)
-path_to_connectome_folder = Path("/Users/alexandrosgoulas/Data/work-stuff/python-code/development/Bio2Art/connectomes/")
+path_to_connectome_folder = Path("/.../Bio2Art/connectomes/")#change to the folder where the Bio2Art was installed
 
 file_conn = "C_Macaque_Normalized.npy"# the macaque monkey neuronal network (see bio2art_from_conn_mat for all names of available connectomes)
 
