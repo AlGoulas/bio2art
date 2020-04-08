@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
-import bio2art_import as b2a
+from bio2art import bio2art_import
 from echoes.tasks import MemoryCapacity
 from echoes.plotting import plot_forgetting_curve, set_mystyle
 
@@ -92,7 +92,7 @@ path_to_connectome_folder = Path("/Users/alexandrosgoulas/Data/work-stuff/python
 # The connectome that we would like to use
 file_conn = "C_Marmoset_Normalized.npy"
 
-net_orig, net_scaled, region_neuron_ids = b2a.bio2art_from_conn_mat(
+net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
     neuron_density=None, 
