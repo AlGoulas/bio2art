@@ -43,7 +43,7 @@ path_to_connectome_folder = Path("/Users/alexandrosgoulas/Data/work-stuff/python
 
 file_conn = "C_Macaque_Normalized.npy"# the macaque monkey neuronal network (see bio2art_from_conn_mat for all names of available connectomes)
 
-net_orig, net_rescaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
+net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
     neuron_density=None, 
@@ -52,7 +52,7 @@ net_orig, net_rescaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat
     target_sparsity=0.1
     )
 ```
-The neuron_density is the recurrent neural network based on the indicated empirical monkey neuronal network. However, since neuron_density=None and seed_neurons=None, C_Neurons is exactly the same with C, that is, the exact same empirical monkey neural network. Not very useful. Let's see how we can create something more meaningful and helpful. 
+The neuron_density is the recurrent neural network based on the indicated empirical monkey neuronal network. However, since neuron_density=None and seed_neurons=None, net_scaled is exactly the same with net_orig, that is, the exact same empirical monkey neural network. Not very useful. Let's see how we can create something more meaningful and helpful. 
 
 The neuron_density and seed_neurons parameters can help us scale up the recurrent neural network while we stay faithful to the topology of the empirical neural network (here, the macaque monkey).
 
@@ -61,7 +61,7 @@ import numpy as np
 neuron_density=np.zeros(29,)
 neuron_density[:] = 10
 
-net_orig, net_rescaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
+net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
     neuron_density=neuron_density, 
@@ -70,99 +70,123 @@ net_orig, net_rescaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat
     target_sparsity=0.1
     )
 ```
-Now the neuron_density parameter is a numpy array and each entry is containing the number 10. This means that each region ND[i] consists of 10 neurons. Thus, now the resulting recurrent neural network net_rescaled contains 290 neurons (29 regions of the original connectome x 10 neurons per region as we indicated). These neurons are connected based on the topology of the the actual empirical neural network. Therefore, net_rescaled is a bioinstantiated recurrent neural network, but scaled up to 290 neurons. 
+Now the neuron_density parameter is a numpy array and each entry is containing the number 10. This means that each region ND[i] consists of 10 neurons. Thus, now the resulting recurrent neural network net_scaled contains 290 neurons (29 regions of the original connectome x 10 neurons per region as we indicated). These neurons are connected based on the topology of the the actual empirical neural network. Therefore, net_scaled is a bioinstantiated recurrent neural network, but scaled up to 290 neurons. 
 
 If we want to assume that regions contain another number of neurons, we just simply construct neuron_density accordingly (e.g., with 20, 34, 1093 neurons, that is, arbitrary positive integers).
 
 Note that not all regions need to contain the same number of neurons. For instance, we can assume that region 5 contains 40 neurons and the rest of the regions 10 neurons:
 
 ```
-ND=np.zeros(29,)
-ND[:] = 10
-ND[4] = 40
+neuron_density=np.zeros(29,)
+neuron_density[:] = 10
+neuron_density[4] = 40
 
-C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
-    ND=ND, 
-    SeedNeurons=None, 
+    neuron_density=neuron_density, 
+    seed_neurons=None, 
     intrinsic_conn=True, 
     target_sparsity=0.1
     )
 ```
-This means each ND[i] can contain an arbitrary positive integer.
+This means each neuron_density[i] can contain an arbitrary positive integer. The total number of neurons, and thus, shape of net_scaled is for this example [320, 320].
 
-If SeedNeurons is not None, but a positive integer, then the array ND will be scaled such as ND[i]/sum(ND). Subsequently each entry ND, will be multiplied by the SeedNeurons integer. Thus, now each region ND[i] contains ND[i]/sum(ND) * SeedNeurons neurons (actually, the ceil of this number).
+If seed_neurons is not None, but a positive integer, then the array neuron_density will be scaled such as neuron_density[i]/sum(neuron_density). Subsequently each entry neuron_density, will be multiplied by the seed_neurons integer. Thus, now each region neuron_density[i] contains neuron_density[i]/sum(neuron_density). This is derived from the following relation: neuron_density[i]/sum(neuron_density) * seed_neurons (actually, the ceil of this number, since we cannot have non-integer number of neurons in a region).
 
-For instance, assuming 10 neurons per region and SeedNeurons=100:
+For instance, assuming 10 neurons per region and seed_neurons=100:
 
 ```
-ND=np.zeros(29,)
-ND[:] = 10
+neuron_density=np.zeros(29,)
+neuron_density[:] = 10
 
-C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
-    ND=ND, 
-    SeedNeurons=100, 
+    neuron_density=neuron_density, 
+    seed_neurons=100, 
     intrinsic_conn=True, 
     target_sparsity=0.1
     )
 ```
-The recurrent artifical neural network is now a network containing in total 116 neurons.
+The recurrent artifical neural network is now a network (net_scaled) containing in total 116 neurons.
 
-Note that if ND=None, then ND[i]=1. Since ND is scaled to the sum(ND), instantiating the artifical recurrent neural network with ND=None will result in the exact same output as the example above:  
+Note that if neuron_density=None, then internally the will be set to: neuron_density[i]=1. Since neuron_density is scaled to the sum(neuron_density), instantiating the artifical recurrent neural network with neuron_density=None will result in the exact same output as the example above:  
 
 ```
-C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
-    ND=None, 
-    SeedNeurons=100, 
+    neuron_density=None, 
+    seed_neurons=100, 
     intrinsic_conn=True, 
     target_sparsity=0.1
     )
 ```
-The same syntax and parameters are used for isntantiating the artifical recurrent neural network based on the topology of other empirical biological neural network, such as the mouse:
+The same syntax and parameters are used for instantiating the artifical recurrent neural network based on the topology of other empirical biological neural networks, such as the mouse:
 
 ```
 file_conn = "C_Mouse_Ypma_Oh.npy"# the mouse neuronal network 
 
-ND=np.zeros(56,)# this mouse network has 56 regions (see bio2art_from_conn_mat function documentation)
-ND[:] = 10
+neuron_density=np.zeros(56,)# this mouse network has 56 regions (see bio2art_from_conn_mat function documentation)
+neuron_density[:] = 10
 
-C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
-    ND=ND, 
-    SeedNeurons=None, 
+    neuron_density=neuron_density, 
+    seed_neurons=None, 
     intrinsic_conn=True, 
     target_sparsity=0.1
     )
 ```
-This instantiation results in a recurrent neural network C_Neurons that contains 560 neurons (56 regions of the original connectome x 10 neurons per region as we indicated).
+This instantiation results in a recurrent neural network net_scaled that contains 560 neurons (56 regions of the original connectome x 10 neurons per region as we indicated).
 
-In all of the above examples C is a numpy array that corresponds to the biological neural network that was used to construct the artificial neural network. Region_Neuron_Ids is a list of lists. Each list in this list includes integers that are the indexes of the neurons contained within a region. For instance, Region_Neuron_Ids[0] will return the indexes of the neurons in C_Neurons that correspond to region 1 in the biological neural network C. 
+In all of the above examples net_orig is a numpy array that corresponds to the biological neural network that was used to construct the artificial neural network. region_neuron_ids is a list of lists. Each list in this list includes integers that are the indexes of the neurons contained within a region. For instance, region_neuron_ids[0] will return the indexes of the neurons in net_scaled that correspond to region 1 in the biological neural network net_orig. 
 
-Note that in all of the examples above, the self-to-self connections (the diagonal of the C_Neurons numpy array) are set to 0, that is, treated as non-existent. To generate an array with self-to-self connections, use the parameter keep_diag=True (default value, thus, implicitly used in the examples above is False):
+Note that in all of the examples above, the self-to-self connections (the diagonal of the net_scaled numpy array) are set to 0, that is, treated as non-existent. To generate an array with self-to-self connections, use the parameter keep_diag=True (default value, thus, implicitly used in the examples above is False):
 
 ```
 file_conn = "C_Mouse_Ypma_Oh.npy"# the mouse neuronal network 
 
-ND=np.zeros(56,)# this mouse network has 56 regions (see bio2art_from_conn_mat function documentation)
-ND[:] = 10
+neuron_density=np.zeros(56,)# this mouse network has 56 regions (see bio2art_from_conn_mat function documentation)
+neuron_density[:] = 10
 
-C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
-    ND=ND, 
-    SeedNeurons=None, 
+    neuron_density=neuron_density, 
+    seed_neurons=None, 
     intrinsic_conn=True, 
     target_sparsity=0.1,
     keep_diag=True
     )
 ```
-Now C_Neurons will have self-to-self connections (non-zero diagonal entries). Note that this parameter is meaningful only when intrinsic_conn=True.
+Now net_scaled will have self-to-self connections (non-zero diagonal entries). Note that this parameter is meaningful only when intrinsic_conn=True. 
+
+The weight of the diagonal entries (self-to-self connections) is controlled by the parameter intrinsic_wei (default intrinsic_wei=0.8). 
+
+intrinsic_wei is a float (0 1] denoting the percentage of the weight that will be assigned to the intrinsic weights (weight of diagonal entries). E.g., 0.8*sum(extrinsic weight) where sum(extrinsic weight) is the sum of weights of connections from region A to all other regions, but A. 
+
+We can change the weight of the diagonal entries (self-to-self connections) with the parameter intrinsic_wei, e.g., intrinsic_wei=0.8 in the example below:
+
+```
+file_conn = "C_Mouse_Ypma_Oh.npy"# the mouse neuronal network 
+
+neuron_density=np.zeros(56,)# this mouse network has 56 regions (see bio2art_from_conn_mat function documentation)
+neuron_density[:] = 10
+
+net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
+    path_to_connectome_folder, 
+    file_conn, 
+    neuron_density=neuron_density, 
+    seed_neurons=None, 
+    intrinsic_conn=True, 
+    target_sparsity=0.1,
+    keep_diag=True,
+    intrinsic_wei=0.2
+    )
+```
 
 # Examples of use in the context of echo state networks
 
