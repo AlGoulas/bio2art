@@ -297,22 +297,3 @@ def bio2art_from_conn_mat(
                    
     return network_original, network_scaled, region_neuron_ids
 
-
-from pathlib import Path
-path_to_connectome_folder = Path("/Users/alexandrosgoulas/Data/work-stuff/python-code/development/Bio2Art/connectomes/")
-
-file_conn = "C_Macaque_Normalized.npy"# the macaque monkey neuronal network (see bio2art_from_conn_mat for all names of available connectomes)
-
-neuron_density=np.zeros(29,)
-neuron_density[:] = 10
-
-network_original, network_scaled, region_neuron_ids = bio2art_from_conn_mat(
-    path_to_connectome_folder, 
-    file_conn, 
-    neuron_density=None, 
-    seed_neurons=None, 
-    intrinsic_conn=True, 
-    target_sparsity=0.1,
-    keep_diag=True
-    )
-
