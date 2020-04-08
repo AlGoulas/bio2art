@@ -285,7 +285,7 @@ weight_reservoire_low = -1.
 
 # Biological topology reservoire
 # Specify here the folder where your connectomes are contained 
-path_to_connectome_folder = Path("/Users/alexandrosgoulas/Data/work-stuff/python-code/development/Bio2Art/connectomes/")
+path_to_connectome_folder = Path("/Users/alexandrosgoulas/Bio2Art/connectomes/")
 
 # Specify here the connectome that we will use. In this example we use the
 # macaque monkey connectome. 
