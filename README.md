@@ -211,6 +211,8 @@ net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     )
 ```
 
+Note that bio2art_import contains also the function bio2art_from_list. This function can be used to read a csv file that represents a connectome and output the connectome as an numpy array. Not used in the current examples.
+
 # Examples of use in the context of echo state networks
 
 Two examples are included to showcase the use of the Bio2Art conversion in an actual context. Both example focus on a "memory" capacity of the network (both in the "examples" folder).
