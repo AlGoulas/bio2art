@@ -35,42 +35,44 @@ Note that the Bio2Art only uses numpy (tested with numpy==1.16.2). However, to u
 Converting the macaque monkey neural network to a recurrent artifical neural network.
 
 ```
-import bio2art_import as b2a # import Bio2Art function bio2art_import 
+from bio2art import bio2art_import # import Bio2Art function bio2art_import 
+from pathlib import Path
 
 # path to where the "connectomes" folder is located (it is included with the current repository)
-path_to_connectome_folder = Path("/.../Bio2Art/connectomes/")# replace with the path where Bio2Art is installed
+path_to_connectome_folder = Path("/Users/alexandrosgoulas/Data/work-stuff/python-code/development/Bio2Art/connectomes/")
 
 file_conn = "C_Macaque_Normalized.npy"# the macaque monkey neuronal network (see bio2art_from_conn_mat for all names of available connectomes)
 
-C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+net_orig, net_rescaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
-    ND=None, 
-    SeedNeurons=None, 
+    neuron_density=None, 
+    seed_neurons=None, 
     intrinsic_conn=True, 
     target_sparsity=0.1
     )
 ```
-The C_Neurons is the recurrent neural network based on the indicated empirical monkey neuronal network. However, since ND=None and SeedNeurons=None, C_Neurons is exactly the same with C, that is, the exact same empirical monkey neural network. Not very useful. Let's see how we can create something more meaningful and helpful. 
+The neuron_density is the recurrent neural network based on the indicated empirical monkey neuronal network. However, since neuron_density=None and seed_neurons=None, C_Neurons is exactly the same with C, that is, the exact same empirical monkey neural network. Not very useful. Let's see how we can create something more meaningful and helpful. 
 
-The ND and SeedNeurons parameters can help us scale up the recurrent neural network while we stay faithful to the topology of the empirical neural network (here, the macaque monkey).
+The neuron_density and seed_neurons parameters can help us scale up the recurrent neural network while we stay faithful to the topology of the empirical neural network (here, the macaque monkey).
 
 ```
-ND=np.zeros(29,)
-ND[:] = 10
+import numpy as np
+neuron_density=np.zeros(29,)
+neuron_density[:] = 10
 
-C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+net_orig, net_rescaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
-    ND=ND, 
-    SeedNeurons=None, 
+    neuron_density=neuron_density, 
+    seed_neurons=None, 
     intrinsic_conn=True, 
     target_sparsity=0.1
     )
 ```
-Now the ND parameter is a numpy array and each entry is containing the number 10. This means that each region ND[i] consists of 10 neurons. Thus, now the resulting recurrent neural network C_Neurons contains 290 neurons (29 regions of the original connectome x 10 neurons per region as we indicated). These neurons are connected based on the topology of the the actual empirical neural network. Therefore, C_Neurons is a bioinstantiated recurrent neural network, but scaled up to 290 neurons. 
+Now the neuron_density parameter is a numpy array and each entry is containing the number 10. This means that each region ND[i] consists of 10 neurons. Thus, now the resulting recurrent neural network net_rescaled contains 290 neurons (29 regions of the original connectome x 10 neurons per region as we indicated). These neurons are connected based on the topology of the the actual empirical neural network. Therefore, net_rescaled is a bioinstantiated recurrent neural network, but scaled up to 290 neurons. 
 
-If we want to assume that regions contain another number of neurons, we just simply construct ND accordingly (e.g., with 20, 34, 1093 neurons, that is, arbitrary positive integers).
+If we want to assume that regions contain another number of neurons, we just simply construct neuron_density accordingly (e.g., with 20, 34, 1093 neurons, that is, arbitrary positive integers).
 
 Note that not all regions need to contain the same number of neurons. For instance, we can assume that region 5 contains 40 neurons and the rest of the regions 10 neurons:
 
