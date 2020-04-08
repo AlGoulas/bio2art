@@ -71,7 +71,7 @@ net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     target_sparsity=0.1
     )
 ```
-Now the neuron_density parameter is a numpy array and each entry is containing the number 10. This means that each region ND[i] consists of 10 neurons. Thus, now the resulting recurrent neural network net_scaled contains 290 neurons (29 regions of the original connectome x 10 neurons per region as we indicated). These neurons are connected based on the topology of the the actual empirical neural network. Therefore, net_scaled is a bioinstantiated recurrent neural network, but scaled up to 290 neurons. 
+Now the neuron_density parameter is a numpy array and each entry is containing the number 10. This means that each region neuron_density[i] consists of 10 neurons. Thus, now the resulting recurrent neural network net_scaled contains 290 neurons (29 regions of the original connectome x 10 neurons per region as we indicated). These neurons are connected based on the topology of the the actual empirical neural network. Therefore, net_scaled is a bioinstantiated recurrent neural network, but scaled up to 290 neurons. 
 
 If we want to assume that regions contain another number of neurons, we just simply construct neuron_density accordingly (e.g., with 20, 34, 1093 neurons, that is, arbitrary positive integers).
 
