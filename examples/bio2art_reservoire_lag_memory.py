@@ -87,7 +87,7 @@ def threshold_matrix(X, desired_density):
 # ND_areas = np.random.choice([10, 8, 1], p=[.1, .1, .8], size=(57,))
 
 #Specify here the folder where your connectomes are contained 
-path_to_connectome_folder = Path("/Users/alexandrosgoulas/Data/work-stuff/python-code/development/Bio2Art/connectomes/")
+path_to_connectome_folder = Path("/.../Bio2Art/connectomes/")#change to the folder where the Bio2Art was installed
 
 # The connectome that we would like to use
 file_conn = "C_Marmoset_Normalized.npy"
