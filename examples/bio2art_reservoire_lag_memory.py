@@ -87,23 +87,23 @@ def threshold_matrix(X, desired_density):
 # ND_areas = np.random.choice([10, 8, 1], p=[.1, .1, .8], size=(57,))
 
 #Specify here the folder where your connectomes are contained 
-path_to_connectome_folder = Path("/Users/alexandrosgoulas/Bio2Art/connectomes/")
+path_to_connectome_folder = Path("/Users/alexandrosgoulas/Data/work-stuff/python-code/development/Bio2Art/connectomes/")
 
 # The connectome that we would like to use
 file_conn = "C_Marmoset_Normalized.npy"
 
-C, C_Neurons, Region_Neuron_Ids = b2a.bio2art_from_conn_mat(
+net_orig, net_scaled, region_neuron_ids = b2a.bio2art_from_conn_mat(
     path_to_connectome_folder, 
     file_conn, 
-    ND=None, 
-    SeedNeurons=600, 
+    neuron_density=None, 
+    seed_neurons=600, 
     intrinsic_conn=True, 
-    target_sparsity=0.1
+    target_sparsity=0.1,
+    keep_diag=False
     )
 
 # Keep in this variable the size of the C_Neurons to intiialize the reservoir
-size_of_matrix = C_Neurons.shape[0]
-
+size_of_matrix = net_scaled.shape[0]
 
 # Echo state network memory
 set_mystyle() # make nicer plots, can be removed
@@ -115,7 +115,7 @@ W_in = np.random.choice([.1, -.1], p=[.5, .5], size=(n_reservoir, 2))
 
 spectral_radius = .9
 
-density_for_reservoir = density_matrix(C_Neurons)
+density_for_reservoir = density_matrix(net_scaled)
 W = threshold_matrix(W, density_for_reservoir)
 
 # Task parameters (after Jaeger)
@@ -154,20 +154,20 @@ plot_forgetting_curve(mc.lags, mc.forgetting_curve_)
 # the actual weights of the C_Neurons
 
 # Get the indexes for the non zero elements of C_Neurons
-non_zero_C_Neurons = np.where(C_Neurons != 0)
+non_zero_net_scaled = np.where(net_scaled != 0)
 
-x_non_zero_C_Neurons = non_zero_C_Neurons[0]
-y_non_zero_C_Neurons = non_zero_C_Neurons[1]
+x_non_zero_C_Neurons = non_zero_net_scaled[0]
+y_non_zero_C_Neurons = non_zero_net_scaled[1]
 
 rand_indexes_of_non_zeros = np.random.permutation(len(x_non_zero_C_Neurons))
 
 indexes_for_unique1 = int(np.floor(len(rand_indexes_of_non_zeros)/2))
 
 # Assign the same weight as for the random reervoir for a comparison
-C_Neurons[(x_non_zero_C_Neurons[rand_indexes_of_non_zeros[0:indexes_for_unique1]], 
+net_scaled[(x_non_zero_C_Neurons[rand_indexes_of_non_zeros[0:indexes_for_unique1]], 
             y_non_zero_C_Neurons[rand_indexes_of_non_zeros[0:indexes_for_unique1]])] = .47
 
-C_Neurons[(x_non_zero_C_Neurons[rand_indexes_of_non_zeros[indexes_for_unique1:]], 
+net_scaled[(x_non_zero_C_Neurons[rand_indexes_of_non_zeros[indexes_for_unique1:]], 
             y_non_zero_C_Neurons[rand_indexes_of_non_zeros[indexes_for_unique1:]])] = -.47
 
 
@@ -177,7 +177,7 @@ esn_params = dict(
     n_inputs=1,
     n_outputs=len(lags),  # automatically decided based on lags
     n_reservoir=size_of_matrix,
-    W=C_Neurons,
+    W=net_scaled,
     W_in=W_in,
     spectral_radius=spectral_radius,
     bias=0,
