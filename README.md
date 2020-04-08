@@ -38,7 +38,7 @@ Converting the macaque monkey neural network to a recurrent artifical neural net
 import bio2art_import as b2a # import Bio2Art function bio2art_import 
 
 # path to where the "connectomes" folder is located (it is included with the current repository)
-path_to_connectome_folder = Path("/Users/alexandrosgoulas/Data/work-stuff/python-code/development/Bio2Art/connectomes/")
+path_to_connectome_folder = Path("/.../Bio2Art/connectomes/")# replace with the path where Bio2Art is installed
 
 file_conn = "C_Macaque_Normalized.npy"# the macaque monkey neuronal network (see bio2art_from_conn_mat for all names of available connectomes)
 
