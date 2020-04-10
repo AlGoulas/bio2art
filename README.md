@@ -93,7 +93,7 @@ net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
 ```
 This means each neuron_density[i] can contain an arbitrary positive integer. The total number of neurons, and thus, shape of net_scaled is for this example [320, 320].
 
-Note that the parameter target_sparsity is a float (0 1] and controls for each source neuron the percentage of all possible neuron-targets to form connections with. Note that at least 1 neuron will function as target in case that the resulting percentage result in less than 1 neuron. This parameter can be used to make the sparsity of network_scaled vary around the density dictated by the actual biological connectomes. Default=0.2. Note that this parameter is meaningful only if at least on region has more than 1 neuron, that is, for some i, neuron_density[i]>1.
+Note that the parameter target_sparsity is a float (0 1] and controls for each source neuron the percentage of all possible neuron-targets to form connections with. Note that at least 1 neuron will function as target in case that the resulting percentage result in less than 1 neuron. This parameter can be used to make the sparsity of network_scaled vary around the density dictated by the actual biological connectomes. Default=0.2. Note that this parameter is meaningful only if at least one region has more than 1 neuron, that is, for some i, neuron_density[i]>1.
 
 In such cases, the sparsity of network_scaled is affected by the parameter target_sparsity. For instance in the example above, the density of network_scaled (=0.1025) corresponds to 10468 connections.
 
