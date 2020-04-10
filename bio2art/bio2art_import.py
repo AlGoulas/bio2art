@@ -141,7 +141,8 @@ def bio2art_from_conn_mat(
     neuron will function as target in case that the resulting percentage is <1.
     This parameter can be used to make the sparisty of network_scaled vary
     around the density dictated by the actual biological connectomes.
-    Default=0.2. 
+    Default=0.2. Note that this parameter is meaningful only if at least one 
+    region has more than 1 neuron, that is, for some i, neuron_density[i]>1.
     
     intrinsic_wei: float (0 1] denoting the percentage of the weight that 
     will be assigned to the intrinsic weights. E.g., 0.8*sum(extrinsic weight)
