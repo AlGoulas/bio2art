@@ -106,17 +106,18 @@ def bio2art_from_conn_mat(
     """
     Generate matrix network_scaled from a biological connectome
     
-    input:
+    Input
+    -----
     path_to_connectome_folder: the path to the folder with connectome files
     
     file: string with the name of the connectome file of the connectome you 
     would like to use. Currently available:
-    C_Drosophila.npy                 49x49 (shape of the npy array)
-    C_Human_Betzel_Normalized.npy    57x57 
-    C_Macaque_Normalized.npy         29x29
-    C_Marmoset_Normalized.npy        55x55
-    C_Mouse_Gamanut_Normalized.npy   19x19
-    C_Mouse_Ypma_Oh.npy              56x56
+    Drosophila                     49x49 (shape of the npy array)
+    Human_Betzel_Normalized        57x57 
+    Macaque_Normalized             29x29
+    Marmoset_Normalized            55x55
+    Mouse_Gamanut_Normalized       19x19
+    Mouse_Ypma_Oh.npy              56x56
     
     neuron_density: numpy array of positive integers withshape N where 
     N network_original.shape[0] with network_original 
@@ -153,7 +154,8 @@ def bio2art_from_conn_mat(
     self-to-self neuron connections) should be kept of or not. Default True. 
     Note that this parameter only has an effect  when intrinsic_conn is True.
     
-    output:
+    Output
+    ------
     network_original: The actual biological connectome that was used in the 
     form of a numpy array
     
@@ -166,7 +168,7 @@ def bio2art_from_conn_mat(
     network_scaled[region_neuron_ids[1],region_neuron_ids[1]]
     
     """
-    
+    file_conn = 'C_' + file_conn + '.npy' # Prefix and suffix for the file
     file_to_open = path_to_connectome_folder / file_conn
     
     # Read the connectivity matrix - it must be stored as a numpy array
@@ -297,4 +299,3 @@ def bio2art_from_conn_mat(
         np.fill_diagonal(network_scaled, 0.)    
                    
     return network_original, network_scaled, region_neuron_ids
-
