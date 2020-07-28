@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import numpy as np
 import csv
+import numpy as np
+import pkg_resources
 import random
 
 from bio2art import utils
@@ -12,7 +13,7 @@ from bio2art import utils
 
 # Function that simply reads a csv file and returns the matrix that constitutes
 # the neuronal network
-def from_list(path_to_connectome_folder, file):
+def from_list(path_to_connectome_folder, data_name):
 
     """
     Generate matrix W from scv file
@@ -20,7 +21,7 @@ def from_list(path_to_connectome_folder, file):
     Input
     -----
     path_to_connectome_folder: the path to the folder with the csv file
-    file: the name of the csv file
+    data_name: the name of the csv file
     
     Output
     ------
@@ -28,7 +29,7 @@ def from_list(path_to_connectome_folder, file):
     
     """
     
-    file_to_open = path_to_connectome_folder / file
+    file_to_open = path_to_connectome_folder / data_name
     
     # Lists to save the name of the neurons
     # It will be needed to convert the csv fiel to an adjacency matrix    
@@ -89,8 +90,8 @@ def from_list(path_to_connectome_folder, file):
 # Function that constructs a connectivity matrix network_scaled with the topology 
 # that is dictted by biological neuronal networks.     
 def from_conn_mat(
-        path_to_connectome_folder, 
-        file_conn, 
+        data_name,
+        path_to_connectome_folder = None, 
         neuron_density = None, 
         seed_neurons = None, 
         intrinsic_conn = True, 
@@ -105,9 +106,8 @@ def from_conn_mat(
     
     Input
     -----
-    path_to_connectome_folder: the path to the folder with connectome files
     
-    file: string with the name of the connectome file of the connectome you 
+    data_name: string with the name of the connectome file of the connectome you 
         would like to use. Currently available:
         
         'Drosophila'                     49x49 (NxN shape of the npy array)
@@ -116,7 +116,14 @@ def from_conn_mat(
         'Marmoset_Normalized'            55x55
         'Mouse_Gamanut_Normalized'       19x19
         'Mouse_Ypma_Oh'                  56x56
-    
+   
+    path_to_connectome_folder: default None, thus the path to the 'connectomes'
+        folder that is part of the package is used.
+        If the path is specified, then the path must be a passed from the 
+        Path subclasss of pathlib Path('path_to_connectome_folder'). Passing
+        a folder name offers flexibilty for using the bio2art with datasets
+        not currently included in the package.
+
     neuron_density: numpy array of positive integers with shape N where 
         N network_original.shape[0] with network_original 
         the actual biological connectome (above). Each entry of 
@@ -188,8 +195,13 @@ def from_conn_mat(
         network_scaled[region_neuron_ids[1],region_neuron_ids[1]]
     
     """
-    file_conn = 'C_' + file_conn + '.npy' # Prefix and suffix for the file
-    file_to_open = path_to_connectome_folder / file_conn
+    if path_to_connectome_folder is None:
+        path_to_connectome_folder = pkg_resources.resource_filename('bio2art', 'connectomes')
+        file_conn = 'C_' + data_name + '.npy' # Prefix and suffix for the file
+        file_to_open = path_to_connectome_folder + file_conn
+    else:
+        file_conn = 'C_' + data_name + '.npy' # Prefix and suffix for the file
+        file_to_open = path_to_connectome_folder / file_conn
     
     # Read the connectivity matrix - it must be stored as a numpy array
     network_original = np.load(file_to_open)
@@ -375,23 +387,3 @@ def from_conn_mat(
         np.fill_diagonal(network_scaled, 0.)    
                    
     return network_original, network_scaled, region_neuron_ids
-
-
-from pathlib import Path
-path_to_connectome_folder = Path('/Users/alexandrosgoulas/Data/work-stuff/python-code/packages/Bio2Art/connectomes/')
-
-file_conn = 'Marmoset_Normalized' 
-
-neuron_density = np.zeros((55,), dtype=int)
-neuron_density[:] = 4 
-
-C, C_Neurons, Region_Neuron_Ids = from_conn_mat(
-    path_to_connectome_folder, 
-    file_conn, 
-    neuron_density = neuron_density, 
-    seed_neurons = None, 
-    intrinsic_conn = True, 
-    target_sparsity = 0.8,
-    rand_partition = True,
-    keep_diag = True
-    )
