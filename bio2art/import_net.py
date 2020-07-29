@@ -117,12 +117,9 @@ def from_conn_mat(
         'Mouse_Gamanut_Normalized'       19x19
         'Mouse_Ypma_Oh'                  56x56
    
-    path_to_connectome_folder: default None, thus the path to the 'connectomes'
-        folder that is part of the package is used.
-        If the path is specified, then the path must be a passed from the 
-        Path subclasss of pathlib Path('path_to_connectome_folder'). Passing
-        a folder name offers flexibilty for using the bio2art with datasets
-        not currently included in the package.
+    path_to_connectome_folder: The path to the empirical neural network data
+        (connectomes). The path must be a passed from the Path subclasss of 
+        pathlib Path('path_to_connectome_folder'). 
 
     neuron_density: numpy array of positive integers with shape N where 
         N network_original.shape[0] with network_original 
@@ -195,13 +192,8 @@ def from_conn_mat(
         network_scaled[region_neuron_ids[1],region_neuron_ids[1]]
     
     """
-    if path_to_connectome_folder is None:
-        path_to_connectome_folder = pkg_resources.resource_filename('bio2art', 'connectomes')
-        file_conn = 'C_' + data_name + '.npy' # Prefix and suffix for the file
-        file_to_open = path_to_connectome_folder + file_conn
-    else:
-        file_conn = 'C_' + data_name + '.npy' # Prefix and suffix for the file
-        file_to_open = path_to_connectome_folder / file_conn
+    file_conn = 'C_' + data_name + '.npy' # Prefix and suffix for the file
+    file_to_open = path_to_connectome_folder / file_conn
     
     # Read the connectivity matrix - it must be stored as a numpy array
     network_original = np.load(file_to_open)
