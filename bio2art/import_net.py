@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import csv
 import numpy as np
-import pkg_resources
 import random
 
 from bio2art import utils
@@ -96,6 +95,7 @@ def from_conn_mat(
         seed_neurons = None, 
         intrinsic_conn = True, 
         target_sparsity = 0.2, 
+        target_sparsity_intrinsic = 1.,
         intrinsic_wei = 0.8, 
         rand_partition = False,
         keep_diag = True
@@ -141,7 +141,7 @@ def from_conn_mat(
         Note that if seed_neurons=None, the neuron_density array is 
         not scaled and used as is.
     
-    intrinsic_conn: Boolean, default True denoting if the within regions 
+    intrinsic_conn: Boolean, default True, denoting if the within regions 
         neuron-to-neuron  connectivity will be generated. 
         Note that currently all-to-all within region connections are 
         assumed and implemented. 
@@ -159,6 +159,7 @@ def from_conn_mat(
         weight that will be assigned to the intrinsic weights. 
         E.g., 0.8*sum(extrinsic weight)where sum(extrinsic weight) is the sum 
         of weights of connections from region A to all other regions, but A.
+        NOTE: This parameter makes sense only if intrinsic_conn = True. 
     
     rand_partition: Boolean, default False, specifying if the original weight
         of each connection in the empirical connectome will be partitioned
@@ -175,7 +176,7 @@ def from_conn_mat(
     
     keep_diag: Boolean variable, default True denoting if the diagonal entries 
         (denoting self-to-self neuron connections) should be kept of or not. 
-        Note that this parameter only has an effect when intrinsic_conn is True.
+        NOTE: This parameter only has an effect when intrinsic_conn = True.
     
     Output
     ------
@@ -245,8 +246,8 @@ def from_conn_mat(
         #Update the indexes
         start = start + offset
     
-    # Rescale the weights so that the outgoing strength of each regions
-    # is equal to 1
+    # Sum of outgoing weights for each region - used for calculation of 
+    # intrinsic weights.
     sum_C_out = np.sum(network_original, 0)
     
     # Initiate the neuron to neuron connectivity matrix
@@ -276,26 +277,19 @@ def from_conn_mat(
             
             # If target sparsity is specified then calculate the percentage 
             # of intrinsic targets to use (source_indexes)
-            if target_sparsity == 1.:
+            if target_sparsity_intrinsic == 1.:
                 nr_sources_to_use = len(sources_indexes)
                 sources_as_targets = sources_indexes.copy()
-            else:    
-                sources_indexes_to_use = list(range(len(sources_indexes)))
-                nr_sources_to_use = target_sparsity * len(sources_indexes) 
-                
+            else:
+                # If we do not keep the diagonal, then we have to exlcude
+                # one element from the sources_index
+                nr_sources_to_use = target_sparsity_intrinsic * len(sources_indexes) 
+        
                 # Ensure that we keep at least one target neuron
                 if nr_sources_to_use < 1:
                     nr_sources_to_use = 1
                 else:
-                    nr_sources_to_use = int(np.round(nr_sources_to_use))
-                
-                # Keep random nr_sources_to_use
-                random.shuffle(sources_indexes_to_use)
-                sources_indexes_to_use = sources_indexes_to_use[:nr_sources_to_use]
-                
-                # Keep only the sources as targets based on the indexes
-                # contained in list sources_indexes_to_use
-                sources_as_targets = [sources_indexes[s_item] for s_item in sources_indexes_to_use]     
+                    nr_sources_to_use = int(np.round(nr_sources_to_use))   
             
             # Processs the weights of the original neural network based
             # on the rand_partition boolean parameter     
@@ -313,6 +307,23 @@ def from_conn_mat(
                        
             # Populate the matrix with broadcasting of indexes
             for sources in sources_indexes:
+                # Choose random sources as tagets for each step in the for loop
+                # Keep random nr_sources_to_use
+                sources_indexes_to_use = list(range(len(sources_indexes)))
+                
+                # If keep_diag = False we have to exclude the sources from 
+                # the sources_indexes_to_use so that self-self connections
+                # do not occur.
+                if keep_diag == False:
+                    sources_indexes_to_use.pop(sources_indexes_to_use.index(sources))
+                       
+                random.shuffle(sources_indexes_to_use)
+                current_sources_indexes_to_use = sources_indexes_to_use[:nr_sources_to_use]
+                
+                # Keep only the sources_as_targets based on the indexes
+                # contained in list sources_indexes_to_use
+                sources_as_targets = [sources_indexes[s_item] for s_item in current_sources_indexes_to_use] 
+                
                 if rand_partition:
                     network_scaled[sources, 
                                    sources_as_targets] = partitioned_weights[start_partitioned_weights:stop_partitioned_weights]
@@ -323,8 +334,8 @@ def from_conn_mat(
                     network_scaled[sources, 
                                    sources_as_targets] = intrinsic_weight
                         
-        # Loop through the not zeros indexes and fetch the target neuron 
-        # Ids that are stored in region_neuron_ids
+        # Loop through the not zeros indexes and fetch the target neuron ids 
+        # that are stored in region_neuron_ids 
         for target in not_zeros:
             target_indexes = region_neuron_ids[target]
             
@@ -346,11 +357,7 @@ def from_conn_mat(
                 if nr_targets_to_use < 1:
                     nr_targets_to_use = 1
                 else:
-                    nr_targets_to_use = int(np.round(nr_targets_to_use))
-                
-                    # Keep random N=nr_targets_to_use from the target_indexes 
-                    random.shuffle(target_indexes)
-                    target_indexes = target_indexes[:nr_targets_to_use]
+                    nr_targets_to_use = int(np.round(nr_targets_to_use))                
             
             if rand_partition:
                 partitioned_weights = utils.float_partition(current_weight, 
@@ -366,16 +373,23 @@ def from_conn_mat(
                                     
             # Populate the matrix with broadcasting of indexes
             for sources in sources_indexes: 
+                # Create random targets (current_target_indexes) for each 
+                # source seperately (that is, at each step in this for loop)
+                # Keep random N=nr_targets_to_use from the target_indexes 
+                random.shuffle(target_indexes)
+                current_target_indexes = target_indexes[:nr_targets_to_use]
+                
                 if rand_partition:
-                    network_scaled[sources, target_indexes] = partitioned_weights[start_partitioned_weights:stop_partitioned_weights]
+                    network_scaled[sources, current_target_indexes] = partitioned_weights[start_partitioned_weights:stop_partitioned_weights]
                     # Update idx for using the partitioned_weights
                     start_partitioned_weights = stop_partitioned_weights
                     stop_partitioned_weights = stop_partitioned_weights + nr_targets_to_use 
                 else:
-                    network_scaled[sources, target_indexes] = neuron_to_neuron_weight
+                    network_scaled[sources, current_target_indexes] = neuron_to_neuron_weight
                 
     # Remove self-to-self strength/connections (diagonal of network_scaled) 
     if keep_diag is False:    
         np.fill_diagonal(network_scaled, 0.)    
                    
     return network_original, network_scaled, region_neuron_ids
+
