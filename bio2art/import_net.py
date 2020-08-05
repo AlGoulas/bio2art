@@ -300,7 +300,12 @@ def from_conn_mat(
                     # have the proper nr_sources_to_use. 
                     if keep_diag is False and nr_sources_to_use == len(sources_indexes):
                         nr_sources_to_use = nr_sources_to_use - 1 
-                                                
+             
+            # Ensure that we keep at least one target neuron in case that
+            # neuron_density[i] is 1 and self-self connections are not desired            
+            if nr_sources_to_use < 1:
+                nr_sources_to_use = 1
+                                    
             # Processs the weights of the original neural network based
             # on the rand_partition boolean parameter     
             if rand_partition: 
@@ -396,4 +401,3 @@ def from_conn_mat(
                     network_scaled[sources, current_target_indexes] = neuron_to_neuron_weight
                       
     return network_original, network_scaled, region_neuron_ids
-
