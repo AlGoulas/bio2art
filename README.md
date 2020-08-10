@@ -159,7 +159,7 @@ net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
    keep_diag=True
    )
 ```
-# Extrapolating conenction weights from empirical neural networks
+# Extrapolating connection weights from empirical neural networks
 In all of the above examples the parameter rand_partition is False (default values) and, thus, the neuron-to-neuron weights for each neuron m and n belonging to regions i and j respectively are computed as follows:
 network_scaled[m,n] = network_original[i,j] / (nr_source_neurons * nr_target_neurons) with m, n all neurons belonging to region i, j respectively. 
 
