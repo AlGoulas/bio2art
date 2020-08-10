@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 
-from bio2art import bio2art_import
+from bio2art import importnet
 from echoes.tasks import MemoryCapacity
 from echoes.plotting import plot_forgetting_curve, set_mystyle
 
@@ -21,35 +21,25 @@ from echoes.plotting import plot_forgetting_curve, set_mystyle
 # Activation functions - can be used beyond the default tanh for the echo 
 # state network 
 def sigmoid(x):
-    
-   x = 1/(1+np.exp(-x))
-     
+   x = 1/(1+np.exp(-x)) 
    return x 
 
 def relu(x):
-    
     x = np.maximum(x, 0.)
-    
     return x
 
 # Return the density of the matrix X (density is a percentage of exisiting
 # non-zero entries over all possible entries given such amtrix X) 
-def density_matrix(X):
-        
+def density_matrix(X):    
     # Calculate the current density of the matrix
-    # It included the diagonal!
+    # It includes the diagonal!
     X_size = X.shape
     non_zeros = np.where(X != 0)
-    
     density = len(non_zeros[0]) / (X_size[0] * X_size[1])
-    
     return density
-
 
 # It threshold the conenctivity matrix X to satisfy the desired_density.
 def threshold_matrix(X, desired_density):
-    
-    
     #Calculate the current density of the matrix
     #It includes the diagonal! 
     X_size = X.shape
@@ -59,11 +49,8 @@ def threshold_matrix(X, desired_density):
     
     #Clearly the operation makes sense 
     if(current_density <= desired_density):
-        
         print("Current density smaller or equal than the desired one...")
-        
-    else:
-        
+    else: 
         desired_non_zeros = desired_density * (X_size[0] * X_size[1])
         
         nr_entries_to_set_to_zero = int(np.round(len(current_non_zeros[0]) - desired_non_zeros)) 
@@ -87,19 +74,24 @@ def threshold_matrix(X, desired_density):
 # ND_areas = np.random.choice([10, 8, 1], p=[.1, .1, .8], size=(57,))
 
 #Specify here the folder where your connectomes are contained 
-path_to_connectome_folder = Path("/.../Bio2Art/connectomes/")#change to the folder where the Bio2Art was installed
+path_to_connectome_folder = Path('/Users/.../Bio2Art/connectomes/')#change to the folder where the Bio2Art was installed
 
-# The connectome that we would like to use
-file_conn = "C_Marmoset_Normalized.npy"
+# The neural network that we would like to use
+data_name = 'Marmoset_Normalized'
 
-net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
-    path_to_connectome_folder, 
-    file_conn, 
-    neuron_density=None, 
-    seed_neurons=600, 
-    intrinsic_conn=True, 
-    target_sparsity=0.1,
-    keep_diag=False
+neuron_density = np.zeros((55,), dtype=int)
+neuron_density[:] = 2 
+
+net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
+    data_name = data_name, 
+    path_to_connectome_folder = path_to_connectome_folder, 
+    neuron_density = neuron_density, 
+    seed_neurons = None, 
+    target_sparsity = .1,
+    intrinsic_conn = True, 
+    target_sparsity_intrinsic = .5,
+    rand_partition = True,
+    keep_diag = True
     )
 
 # Keep in this variable the size of the C_Neurons to intiialize the reservoir
@@ -110,7 +102,7 @@ set_mystyle() # make nicer plots, can be removed
 
 # Echo state network parameters (after Jaeger)
 n_reservoir = size_of_matrix
-W = np.random.choice([0, .47, -.47], p=[.8, .1, .1], size=(size_of_matrix, size_of_matrix))
+W = np.random.choice([0, .47, -.47], p=[.5, .25, .25], size=(size_of_matrix, size_of_matrix))
 W_in = np.random.choice([.1, -.1], p=[.5, .5], size=(n_reservoir, 2))
 
 spectral_radius = .9
@@ -120,7 +112,7 @@ W = threshold_matrix(W, density_for_reservoir)
 
 # Task parameters (after Jaeger)
 inputs_func=np.random.uniform
-inputs_params={"low":-.1, "high":.1, "size":300}
+inputs_params={'low':-.1, 'high':.1, 'size':300}
 lags = [1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200]
 
 # Random reservoir
@@ -148,7 +140,6 @@ mc = MemoryCapacity(
 #Plot the memory curve for the reservoir with random topology
 plot_forgetting_curve(mc.lags, mc.forgetting_curve_)
 
-
 # What we retouch for the bio2art network is W. To this end, get the unique 
 # pair of values that the random reservoir was initialized with and replace
 # the actual weights of the C_Neurons
@@ -164,8 +155,8 @@ rand_indexes_of_non_zeros = np.random.permutation(len(x_non_zero_C_Neurons))
 indexes_for_unique1 = int(np.floor(len(rand_indexes_of_non_zeros)/2))
 
 # Assign the same weight as for the random reervoir for a comparison
-net_scaled[(x_non_zero_C_Neurons[rand_indexes_of_non_zeros[0:indexes_for_unique1]], 
-            y_non_zero_C_Neurons[rand_indexes_of_non_zeros[0:indexes_for_unique1]])] = .47
+net_scaled[(x_non_zero_C_Neurons[rand_indexes_of_non_zeros[:indexes_for_unique1]], 
+            y_non_zero_C_Neurons[rand_indexes_of_non_zeros[:indexes_for_unique1]])] = .47
 
 net_scaled[(x_non_zero_C_Neurons[rand_indexes_of_non_zeros[indexes_for_unique1:]], 
             y_non_zero_C_Neurons[rand_indexes_of_non_zeros[indexes_for_unique1:]])] = -.47
