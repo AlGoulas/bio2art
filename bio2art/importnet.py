@@ -24,7 +24,8 @@ def from_list(path_to_connectome_folder, data_name):
     
     Output
     ------
-    W: the connectivity matrix in the form of a numpy array
+    W: ndarray of shape (N,N)
+    The connectivity matrix desribing the connections between the N elements
     
     """
     
@@ -89,7 +90,7 @@ def from_list(path_to_connectome_folder, data_name):
 # Function that constructs a connectivity matrix network_scaled with the topology 
 # that is dictted by biological neuronal networks.     
 def from_conn_mat(
-        data_name,
+        data_name = None,
         path_to_connectome_folder = None, 
         neuron_density = None, 
         seed_neurons = None, 
@@ -102,47 +103,51 @@ def from_conn_mat(
         ):
     
     """
-    Generate matrix network_scaled from a biological connectome
+    Generate network_scaled from a biological neural network (connectome).
+    This operation allows the contruction of artiificial neural networks
+    with recurrent matrices that obey the topology and weight strength 
+    contraints of a biological neural network.
     
     Input
     -----
     
-    data_name: string with the name of the connectome file of the connectome you 
-        would like to use. Currently available:
+    data_name: str
+        String denoting the name of the neuronal network would like to use. 
+        Currently available:
         
-        'Drosophila'                     49x49 (NxN shape of the npy array)
+        'Drosophila'                     49x49 (NxN shape of the ndarray)
         'Human_Betzel_Normalized'        57x57 
         'Macaque_Normalized'             29x29
         'Marmoset_Normalized'            55x55
         'Mouse_Gamanut_Normalized'       19x19
         'Mouse_Ypma_Oh'                  56x56
    
-    path_to_connectome_folder: The path to the empirical neural network data
-        (connectomes). The path must be a passed from the Path subclasss of 
-        pathlib Path('path_to_connectome_folder'). 
+    path_to_connectome_folder: object of class pathlib.PosixPath 
+        The path to the empirical neural network data (connectomes). 
+        The path must be a passed from the Path subclasss of 
+        pathlib: path_to_connectome_folder = Path('path_to_desired_dataset'). 
 
-    neuron_density: numpy array of positive integers with shape N where 
-        N network_original.shape[0] with network_original 
-        the actual biological connectome (above). Each entry of 
-        neuron_density[i] is denoting the number of neurons that we assume 
-        to inhabit region i. 
-        neuron_density by default gets populated with 1s (1 neuron per region). 
+    neuron_density: ndarray of positive int with shape (N,), default None 
+        N corresponds to the actual biological neural network (see data_name). 
+        Each entry of  neuron_density[i] is denoting the number of neurons 
+        that we assume to inhabit region i. 
+        NOTE: if None (default) then neuron_density by will internally get 
+        populated with 1s (1 neuron per region). 
+        If seed_neurons is not None each entry of neuron_density will be 
+        normalized as proportion over the sum(neuron_density)
     
-        Note that if seed_neurons is not None each entry of neuron_density 
-        will be normalized as proportion over the sum(neuron_density)
-    
-    seed_neurons: Positive integer, default None, denoting the nr of neurons 
-        that will be multiplied by neuron_density[i] to result in the number 
-        of neurons to be considered for each region i. 
-    
-        The neuron_density numpy array will be normalized for every region i as:  
+    seed_neurons: Positive int, default None
+        Number of neurons that will be multiplied by neuron_density[i] to 
+        result in the number of neurons to be considered for each region i. 
+        The neuron_density numpy array will be normalized for every region i 
+        as:  
         neuron_density[i] / sum(neuron_density)
+        NOTE: if seed_neurons=None, the neuron_density array is not scaled and 
+        used as is.
     
-        Note that if seed_neurons=None, the neuron_density array is 
-        not scaled and used as is.
-    
-    target_sparsity: float (0 1], default 0.2, for each source neuron the 
-        percentage of all possible neuron-targets to form connections with. 
+    target_sparsity: float (0 1], default 0.2 
+        The percentage of all possible neuron-targets for each source neuron 
+        to form connections with. 
         Note that at least 1 neuron will function as target in case that the 
         resulting percentage is <1.
         This parameter can be used to make the sparisty of network_scaled vary
@@ -150,48 +155,55 @@ def from_conn_mat(
         Note that this parameter is meaningful only if at least one region 
         has more than 1 neuron, that is, for some i, neuron_density[i]>1.
     
-    intrinsic_conn: Boolean, default True, denoting if the within regions 
-        neuron-to-neuron  connectivity will be generated. 
+    intrinsic_conn: bool, default True, 
+        Specify if the within regions neuron-to-neuron connectivity will be 
+        generated (=True) or not. 
         
-    target_sparsity_intrinsic: float (0 1], default 1., same as 
-        target_sparsity, but for the within-region/intrinsic connections
+    target_sparsity_intrinsic: float (0 1], default 1.
+        Same as target_sparsity, but for the within-region/intrinsic 
+        connections.
         
-    intrinsic_wei: float (0 1], default 0.8, denoting the percentage of the
-        weight that will be assigned to the intrinsic weights. 
-        E.g., 0.8*sum(extrinsic weight)where sum(extrinsic weight) is the sum 
+    intrinsic_wei: float (0 1], default .8
+        The percentage of the weight that will be assigned to the intrinsic 
+        weights. 
+        E.g., 0.8*sum(extrinsic weight) where sum(extrinsic weight) is the sum 
         of weights of connections from region A to all other regions, but A.
         NOTE: This parameter makes sense only if intrinsic_conn = True. 
     
-    rand_partition: Boolean, default False, specifying if the original weight
-        of each connection in the empirical connectome will be partitioned
-        in k parts that sum to the original connection weight, 
-        where k = nr_source_neurons * nr_target_neurons. nr_source_neurons
+    rand_partition: bool, default False
+        Specify if the original weight of each connection in the empirical 
+        connectome will be partitioned in k parts that sum to the original 
+        connection weight, where 
+        k = nr_source_neurons * nr_target_neurons. nr_source_neurons
         and nr_target_neurons are the nr of neurons in the source i and target 
         areas j as part of C_Neurons[i,j]. The original connection weight is
         C[i,j] where C the connectome corresponding to the dataset specified
         on the parameter file.
         If False, then for a given source and target i,j C[i,j] will
-        be populated withe equal constant wight values such that:
+        be populated withe equal constant weight values such that:
         C_Neurons[m,n] = C[i,j] / (nr_source_neurons * nr_target_neurons)
         with m, n all index neurons belonging to region i, j respectively. 
     
-    keep_diag: Boolean variable, default True denoting if the diagonal entries 
-        (denoting self-to-self neuron connections) should be kept of or not. 
+    keep_diag: bool, default True 
+        Specify if the diagonal entries (denoting self-to-self neuron 
+        connections) should be kept of or not. 
         NOTE: This parameter only has an effect when intrinsic_conn = True.
     
     Output
     ------
-    network_original: The actual biological neural network that was used in the 
-        form of a NxN numpy array (see description of data sets for each N)
+    network_original: ndrarray of shape (N,N)
+        The actual biological neural network that was used, with no 
+        modificiations/scaling (see data_name for N)
     
-    network_scaled: the artificial neural network in the form of a 
-        numpy array (NxN with N bound to the parameters seed_neurons,
-        neuron_density)
+    network_scaled: ndarray of shape (M,M) 
+        The rescaled neural network. 
+        (M is bound to the parameters: seed_neurons, neuron_density)
     
-    region_neuron_ids: A list of list of integers for tracking the neurons of 
-        the network_scaled array. region_neuron_ids[1] contains a list with 
-        integers that denote the neurons of region 1 in network_scaled as 
-        network_scaled[region_neuron_ids[1],region_neuron_ids[1]]
+    region_neuron_ids: list of lists of int 
+        List of lists for tracking the neurons of the network_scaled network. 
+        region_neuron_ids[1] contains a list with integers that denote the 
+        neurons of region 1 in network_scaled as 
+        network_scaled[region_neuron_ids[1], region_neuron_ids[1]]
     
     """
     file_conn = 'C_' + data_name + '.npy' # Prefix and suffix for the file
@@ -208,7 +220,8 @@ def from_conn_mat(
         neuron_density=np.ones((network_original.shape[0],))
           
     if(neuron_density.shape[0] != network_original.shape[0]):
-        print("Size of neuron_density must be equal to value of connectome:", network_original.shape[0])
+        print("Size of neuron_density must be equal to value of connectome:", 
+              network_original.shape[0])
         return 
     
     # If seed_neurons is specified, then we scale the neuron_density so that each entry
