@@ -172,17 +172,18 @@ def from_conn_mat(
     
     rand_partition: bool, default False
         Specify if the original weight of each connection in the empirical 
-        connectome will be partitioned in k parts that sum to the original 
-        connection weight, where 
-        k = nr_source_neurons * nr_target_neurons. nr_source_neurons
-        and nr_target_neurons are the nr of neurons in the source i and target 
-        areas j as part of C_Neurons[i,j]. The original connection weight is
-        C[i,j] where C the connectome corresponding to the dataset specified
-        on the parameter file.
-        If False, then for a given source and target i,j C[i,j] will
-        be populated withe equal constant weight values such that:
-        C_Neurons[m,n] = C[i,j] / (nr_source_neurons * nr_target_neurons)
-        with m, n all index neurons belonging to region i, j respectively. 
+        neural network will be partitioned in k parts that sum to the original 
+        connection weight, where k = nr_source_neurons * nr_target_neurons.
+        nr_source_neurons and nr_target_neurons are the nr of neurons in the 
+        source i and target areas j as part of network_scaled[i,j]. 
+        The original connection weight is network_original[i,j] where 
+        network_original the neural network corresponding to the dataset 
+        specified on the parameter file. 
+        If False, then for a given source and target i,j network_original[i,j] 
+        will be populated with thee equal constant weight values such that:
+        network_scaled[m,n] = network_original[i,j] / (nr_source_neurons * 
+        nr_target_neurons) with m, n all neurons belonging to region i, j 
+        respectively. 
     
     keep_diag: bool, default True 
         Specify if the diagonal entries (denoting self-to-self neuron 
