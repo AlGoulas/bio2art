@@ -23,12 +23,16 @@ The constructed artificial recurrent neural network is returned as a ndarray and
 
 # Installation
 
-Download or clone the repository. Open a terminal and change to the corresponding folder. Type:
+Download or clone the repository. It is advisable to create a virtual environment (e.g., with conda) with the Bio2Art/requirements.txt 
+
+Open a terminal and change to the corresponding folder. Type:
 
 ```
 pip install .
 ```
-Note that the Bio2Art only uses numpy (tested with numpy==1.16.2). However, to use the examples (see below), further libraries are needed. Therefore, for executing the examples, create a virtual environment (e.g., with conda) with the requirements enlisted in the requirements.txt file in the "examples" folder.  
+Note that the Bio2Art only uses numpy (tested with numpy==1.16.2). 
+
+Note that to use the examples (see below), further libraries are needed. Therefore, for executing the examples described in section "Examples of use in the context of echo state networks", create a virtual environment (e.g., with conda) with the requirements enlisted in examples/requirements.txt
 
 # Examples
 # Basic use
@@ -229,7 +233,55 @@ This instantiation results in a recurrent neural network net_scaled that contain
 
 In all of the above examples net_orig is a ndarray that corresponds to the biological neural network that was used to construct the artificial neural network. region_neuron_ids is a list of lists. Each list in this list includes integers that are the indexes of the neurons contained within a region. For instance, region_neuron_ids[0] will return the indexes of the neurons in net_scaled that correspond to region 1 in the biological neural network net_orig. See section Utilities to see how the names of each egion can be imported. 
 
-Note that import_net contains also the function from_list. This function can be used to read a csv file that represents a connectome and output the connectome as ndarray. Not used in the current examples but useful to read neural network data in a csv form.
+Note that importnet contains also the function from_list. This function can be used to read a csv file that represents a connectome and output the connectome as ndarray. Not used in the current examples, but useful to read neural network data in a csv form.
+
+# Utilities
+Certain utility functions can be used to extract more information about the neural networks that are prepackaged. Let's see how these ultility functions are used.
+# Names of regions/nodes
+We can load the names of the regions of the biological neural networks. For instance, if we are working with the marmoset monkey neural network, we can load the names as follows:
+
+```
+from pathlib import Path
+path_to_connectome_folder = Path('/Users/.../Bio2Art/connectomes/')# Replace with the correct path pointign to the prepackaged data
+
+names = bio2art.utils.get_names(path_to_connectome_folder, 'Marmoset_Normalized')
+
+``` 
+names is now a list of str containing the acrobyms of the 55 brain regions of the marmoset brain. 
+
+In the exact same way we can load the names of the rest of data sets.
+
+# Neuron densities of regions/nodes
+We can load the neuron densities of each brain region as follows:
+```
+nd = bio2art.utils.get_neuron_density(path_to_connectome_folder, 'Marmoset_Normalized')
+```
+nd is a ndarray of shape (N,) and N is the number of areas in the connectome. Each entry of neuron_density denotes the neuron density (nr of neurons per mm3) for each region/node (see Citations for experimental details).
+
+Note that neuron density measurments are available for the Macaque_Normalized and Marmoset_Normalized datasets and that Macaque_Normalized contains NaN values for some regions (no available empirical data).             
+
+# Scaling neuron densities
+Working with the actual neuron densities "as is" can pose computational challenges. For instance, the sum of neuron densities for the marmsoet is 4837703, so the bio-instantiated recurrent neural network would have more than 4 million neurons. To alleviate computational issues and take into account that for certain applications or research questions recurrent networks with this size are not necessary, we can scale the empirical measurements so that we have the desired network size. Two options are available, that is, working with ratios of neuron densities or rank ordered neuron densities. Let's see how it works:
+
+```
+from pathlib import Path
+path_to_connectome_folder = Path('/Users/.../Bio2Art/connectomes/')# Replace with the correct path pointign to the prepackaged data
+
+nd = bio2art.utils.get_neuron_density(path_to_connectome_folder, 'Marmoset_Normalized')
+
+nd_scaled = bio2art.utils.scale_neuron_density(nd, seed_neuron=2, scale_type='ratio')
+``` 
+The resulting nd_scaled is an ndarray that now expresses the nd values as ratios:
+nd_scaled = round((nd[i] / min(nd)) * seed_neuron) where i denotes each of the N regions.  
+So the ratio is the actual neuron density value over the min neuron density value multiplied by seed_neuron. seed_neuron allows us to scale the size of the network by multiplying the nd[i] / min(nd) ratio. 
+
+We can also use the rank of the nd values:
+```
+nd_scaled = bio2art.utils.scale_neuron_density(nd, seed_neuron=2, scale_type='rank')
+```
+In this case only the rank order of the nd values is taken into account, and thus the magnituide of e.g., rank 1 and 4 is ignored. The resulting nd_scaled is simply the rank ordered nd values multiplied by seed_neuron.
+
+You can use the above neuron density or scaled neuron density values as the neuron_density argument in the importnet function for generating a bio-instantiated recurrent neural network (see documentation of importnet).   
 
 # Examples of use in the context of echo state networks
 
@@ -252,7 +304,7 @@ Note that the examples can be run with the requirements enlisted in requirements
 
 # Citations
 
-Apart from explicitly refering to this repository, certain empirical datasets are used as well. Thus, if you use a specific empirical connectome to instantiate a recurrent artifical neural network, please cite the following papers:
+Apart from explicitly refering to this repository, certain empirical datasets are used as well. Thus, if you use a specific empirical neural network to instantiate a recurrent artifical neural network, please cite the appropriate item form the following list papers:
 
 Fly:
 A.-S. Chiang et al. Three-dimensional reconstruction of brain-wide wiring networks in Drosophila at single-cell resolution.Curr. Biol.21,1–11 (2011) https://doi.org/10.1016/j.cub.2010.11.056

@@ -11,21 +11,26 @@ def get_names(path_to_connectome_folder, data_name):
     
     Input
     -----
-    path_to_connectome_folder: the path to the folder with connectome files
+    path_to_connectome_folder: object of class pathlib.PosixPath 
+        The path to the empirical neural network data (connectomes). 
+        The path must be a passed from the Path subclasss of 
+        pathlib: path_to_connectome_folder = Path('path_to_desired_dataset'). 
     
-    data_name: string with the name of the connectome file of the connectome you 
-        would like to use. Currently available:
+    data_name: str 
+        String denoting the name of the neuronal network would like to use. 
+        Currently available:
         
-    Drosophila                     
-    Human_Betzel_Normalized        
-    Macaque_Normalized             
-    Marmoset_Normalized            
-    Mouse_Gamanut_Normalized       
-    Mouse_Ypma_Oh
-    
+        'Drosophila'                     49x49 (NxN shape of the ndarray)
+        'Human_Betzel_Normalized'        57x57 
+        'Macaque_Normalized'             29x29
+        'Marmoset_Normalized'            55x55
+        'Mouse_Gamanut_Normalized'       19x19
+        'Mouse_Ypma_Oh'                  56x56
+     
     Output
     ------
-    names: list of strings of len N, with N the number of areas in the 
+    names: list of str 
+        list has len N, with N the number of areas in the 
         connectome, indicating the names of each brain region/node
     
     Note: Pickle is used for loading the names
@@ -45,18 +50,24 @@ def get_neuron_density(path_to_connectome_folder, data_name):
     
     Input
     -----
-    path_to_connectome_folder: the path to the folder with connectome files
+    path_to_connectome_folder: object of class pathlib.PosixPath 
+        The path to the empirical neural network data (connectomes). 
+        The path must be a passed from the Path subclasss of 
+        pathlib: path_to_connectome_folder = Path('path_to_desired_dataset'). 
     
-    data_name: string with the name of the connectome file of the connectome you 
-        would like to use. Currently available:
-              
-    Macaque_Normalized             
-    Marmoset_Normalized            
+    data_name: str 
+        String denoting the name of the neuronal network would like to use. 
+        Currently available:
+                  
+        'Macaque_Normalized'             
+        'Marmoset_Normalized'            
 
     Output
     ------
-    neuron_density: list of strings of len N, with N the number of areas in the 
-        connectome, indicating the names of each brain region/node
+    neuron_density: ndarray of int of shape (N,)
+        N is the number of nodes in the neural networks. Each entry of 
+        neuron_density denotes the neuron density (nr of neurons per mm3) 
+        for each region/node.
     
     '''
     
@@ -64,36 +75,38 @@ def get_neuron_density(path_to_connectome_folder, data_name):
     file_to_open = path_to_connectome_folder / file_conn
     neuron_density = np.load(file_to_open)
     
-    return neuron_density 
+    return neuron_density.astype('int64') 
 
 #  Construct a scaled neuron_density array based on the seed_neuron
 def scale_neuron_density(neuron_density, 
                          seed_neuron=1,
                          scale_type='rank'):
     '''
-    Construct a scaled neuron_density array based on the seed_neuron
+    Construct a scaled neuron_density ndarray based on rank ordered or ratios 
+    of neuron_density values and seed_neuron 
      
     Input
     -----
-    neuron_density: numpy array of shape (N,), with N the number of areas in 
-        the connectome with entry i denoting the neuron denisty of region i 
+    neuron_density: ndarray of int of shape (N,)
+        N the number of areas in the connectome with entry i denoting the 
+        neuron density of region i 
         (returned from function get_neuron_density).
     
-    seed_neuron: int, default 1, specifying the number that will be multiplied
-        by the scaled neuron_density.
+    seed_neuron: int, default 1
+        specifying the number that will be multiplied by the scaled 
+        neuron_density.
         
-    scale_type: string 'ratio' 'rank', default 'rank', specifying how the 
-        neuron_density valeus will be scaled. 
+    scale_type: str 'ratio' 'rank', default 'rank'
+        Specifying how the neuron_density values will be scaled. 
         'rank': the values are rank ordered and multiplied by seed_neuron
-        'ratio':the values are converted to ratios, 
+        'ratio': the values are converted to ratios, 
         neuron_density[i] / min(neuron_density) and multiplied by seed_neuron 
        
-    
     Output
     ------
-    scaled_neuron_density: numpy array of shape (N,), with N the number  
-        of areas in the connectome, indicating the scaled neuron_density of 
-        each brain region/node
+    scaled_neuron_density: ndarray of int of shape (N,)
+        N the number of nodes in the neuronal network, indicating the scaled 
+        neuron_density of each brain region/node
     
     '''
     # Copy and sort the neuron densities
@@ -119,26 +132,27 @@ def scale_neuron_density(neuron_density,
                 scaled_neuron_density[y_ind[i]] = 1
                 denominator = neuron_density_srt[i]
             scaled_neuron_density[y_ind[i]] = round((item / denominator) * seed_neuron)       
-        
-    scaled_neuron_density = scaled_neuron_density.astype('int64')                                  
-    
-    return scaled_neuron_density 
+                                   
+    return scaled_neuron_density.astype('int64')       
 
 # Partition integer i in n random integers that sum to i 
-def int_partition(i, n):
+def _int_partition(i, n):
     '''
     Partition integer i in n random integers that sum to i 
     
     Input
     -----
-    i:  int, a positive integer that needs to be partitioned in n integers
+    i:  int
+        a positive integer that needs to be partitioned in n integers
         that sum to i 
-    n:  int, a positive integer specifying the number of partitions/integers
+    n:  int
+        a positive integer specifying the number of partitions/integers
         to be generated
          
     Output
     ------   
-    partitions, list, list of n integers with the property 
+    partitions, list of int
+        list of n integers with the property 
         sum(partitions)==i 
     '''
     partitions=[]
@@ -167,20 +181,23 @@ def int_partition(i, n):
     return partitions
 
 # Partition float f in n random floats that sum to f 
-def float_partition(f, n):
+def _float_partition(f, n):
     '''
     Partition float f in n random floats that sum to f 
     
     Input
     -----
-    f:  float, a positive float that needs to be partitioned in n floats
+    f:  float
+        a positive float that needs to be partitioned in n floats
         that sum to i 
-    n:  int, a positive integer specifying the number of partitions/integers
+    n:  int
+        a positive integer specifying the number of partitions/integers
         to be generated
          
     Output
     ------   
-    partitions, list, list of n float numbers with the property 
+    partitions, list of float
+        list of n float numbers with the property 
         sum(partitions)==f
     '''
     partitions=[]             
