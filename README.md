@@ -31,7 +31,7 @@ Open a terminal and change to the corresponding folder. Type:
 ```
 pip install .
 ```
-Note that the Bio2Art only uses numpy (tested with numpy==1.16.2). 
+Note that the Bio2Art only uses numpy (tested with numpy=1.16.2). 
 
 Note that to use the examples (see below), further libraries are needed. Therefore, for executing the examples described in section "Examples of use in the context of echo state networks", create a virtual environment (e.g., with conda) with the requirements enlisted in examples/requirements.txt
 
@@ -70,7 +70,7 @@ neuron_density=np.zeros(29, dtype=int)
 neuron_density[:] = 10
 
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-    path_to_connectome_folder = path_to_connectome_folder, 
+    path_to_connectome_folder=path_to_connectome_folder, 
     data_name=data_name,
     neuron_density=neuron_density, 
     intrinsic_conn=False, 
@@ -89,7 +89,7 @@ neuron_density[:] = 10
 neuron_density[4] = 40
 
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-    path_to_connectome_folder = path_to_connectome_folder, 
+    path_to_connectome_folder=path_to_connectome_folder, 
     data_name=data_name,
     neuron_density=neuron_density, 
     intrinsic_conn=False, 
@@ -106,7 +106,7 @@ If target_sparsity=0.8 as in the example below:
 
 ```
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-    path_to_connectome_folder = path_to_connectome_folder, 
+    path_to_connectome_folder=path_to_connectome_folder, 
     data_name=data_name,
     neuron_density=neuron_density, 
     intrinsic_conn=False, 
@@ -120,7 +120,7 @@ then the density of network_scaled becomes higher(=0.529) corresponding to 54160
 If we want to build a neural network with intrinsic, within-region connections and self-to-self connections, then the intrinsic_conn and keep_diag parameters should be used:
 ```
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-    path_to_connectome_folder = path_to_connectome_folder, 
+    path_to_connectome_folder=path_to_connectome_folder, 
     data_name=data_name,
     neuron_density=neuron_density, 
     intrinsic_conn=True, 
@@ -135,12 +135,12 @@ Note that when the intrinsic_conn=True option is used, an additional parameter t
 Let's see an example:
 ```
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-   path_to_connectome_folder = path_to_connectome_folder, 
+   path_to_connectome_folder=path_to_connectome_folder, 
    data_name=data_name,
    neuron_density=neuron_density, 
    intrinsic_conn=True, 
    target_sparsity=0.8,
-   target_sparsity_intrinsic = .5,
+   target_sparsity_intrinsic=0.5,
    keep_diag=True
    )
 ```
@@ -151,7 +151,7 @@ When intrinsic_conn=True, the the parameter intrinsic_wei is relevant: intrinsic
 We can change the weight of intrinsic conenctions, including self-to-self connections, with the parameter intrinsic_wei, e.g., intrinsic_wei=0.5 in the example below:
 ```
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-   path_to_connectome_folder = path_to_connectome_folder, 
+   path_to_connectome_folder=path_to_connectome_folder, 
    data_name=data_name,
    neuron_density=neuron_density, 
    intrinsic_conn=True, 
@@ -167,7 +167,7 @@ network_scaled[m,n] = network_original[i,j] / (nr_source_neurons * nr_target_neu
 This introduces less diversity and may impact the amount of diverse transformations that are applied to the input to the network (since many connections from one source neuron to many target neurons has the exact same weight). Therefore, in orderr to introduce more diversity but also construct net_scaled based on the empirical values of the neural network, we can specify rand_partition=True. This has as a result to compute heterogeneous strengths of for the neuron-to-neuron connections as follows: empirical wieight network_original[i,j] will be partitioned in k parts that sum to the original connection weight network_original[i,j], where k = nr_source_neurons * nr_target_neurons, with nr_source_neurons and nr_target_neurons are the nr of neurons in the source i and target areas j as part of network_scaled[i,j]. These k values will be assigned as conenction weights for the k connections between neurons inhabiting regions i and j. Let's see an example:
 ```
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-   path_to_connectome_folder = path_to_connectome_folder, 
+   path_to_connectome_folder=path_to_connectome_folder, 
    data_name=data_name,
    neuron_density=neuron_density, 
    intrinsic_conn=True, 
