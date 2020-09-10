@@ -93,7 +93,6 @@ def from_conn_mat(
         data_name = None,
         path_to_connectome_folder = None, 
         neuron_density = None, 
-        seed_neurons = None, 
         target_sparsity = 0.2,
         intrinsic_conn = True, 
         target_sparsity_intrinsic = 1.,
@@ -133,17 +132,6 @@ def from_conn_mat(
         that we assume to inhabit region i. 
         NOTE: if None (default) then neuron_density by will internally get 
         populated with 1s (1 neuron per region). 
-        If seed_neurons is not None each entry of neuron_density will be 
-        normalized as proportion over the sum(neuron_density)
-    
-    seed_neurons: Positive int, default None
-        Number of neurons that will be multiplied by neuron_density[i] to 
-        result in the number of neurons to be considered for each region i. 
-        The neuron_density numpy array will be normalized for every region i 
-        as:  
-        neuron_density[i] / sum(neuron_density)
-        NOTE: if seed_neurons=None, the neuron_density array is not scaled and 
-        used as is.
     
     target_sparsity: float (0 1], default 0.2 
         The percentage of all possible neuron-targets for each source neuron 
@@ -198,7 +186,7 @@ def from_conn_mat(
     
     network_scaled: ndarray of shape (M,M) 
         The rescaled neural network. 
-        (M is bound to the parameters: seed_neurons, neuron_density)
+        (M is bound to the parameter neuron_density)
     
     region_neuron_ids: list of lists of int 
         List of lists for tracking the neurons of the network_scaled network. 
@@ -213,34 +201,18 @@ def from_conn_mat(
     # Read the connectivity matrix - it must be stored as a numpy array
     network_original = np.load(file_to_open)
     
-    # What needs to be done is:
-    # Use the neuron_density vector to create and connect regions containing neurons that 
-    # contain seed_neurons*neuron_density[i] where neuron_density is the vector specifying the 
-    # percentage of neurons for each region i.
+    # If neuron_density is not specified then populate each region with 1 
+    # neuron
     if neuron_density is None:
-        neuron_density=np.ones((network_original.shape[0],))
-          
+        neuron_density=np.ones((network_original.shape[0],), dtype=int)
+    
+    all_neurons = np.sum(neuron_density)# how many neurons do we have?
+        
     if(neuron_density.shape[0] != network_original.shape[0]):
         print("Size of neuron_density must be equal to value of connectome:", 
               network_original.shape[0])
         return 
-    
-    # If seed_neurons is specified, then we scale the neuron_density so that each entry
-    # neuron_density[i] is a percentage over all neurons contained in neuron_density. Then each entry 
-    # is scaled up by getign multiplied by the seed_neurons. 
-    if seed_neurons is not None:    
-        sum_ND = np.sum(neuron_density)
-        ND_scaled_sum = neuron_density / sum_ND
-        Nr_Neurons = np.ceil(ND_scaled_sum * seed_neurons)
-        all_neurons = np.sum(Nr_Neurons)
         
-    # If no seed_neurons is used, then the all_neurons variable is simply 
-    # sum(neuron_density) and the Nr_Neurons to work with is siply the unscaled
-    # neuron_density array as passed as an input argument.    
-    if seed_neurons is None:
-       all_neurons = np.sum(neuron_density)
-       Nr_Neurons = neuron_density
-    
     # Construct the neuron to neuron matrix - it is simply an array of unique
     # integer ids of all the neurons dictated by all_neurons  
     index_neurons = [i for i in range(int(all_neurons))]
@@ -252,7 +224,7 @@ def from_conn_mat(
     start = 0
     
     for i in range(network_original.shape[0]):
-        offset = Nr_Neurons[i]
+        offset = neuron_density[i]
         offset = int(offset)
         
         new_list_of_region = list(range(start, (start + offset)))
@@ -323,7 +295,7 @@ def from_conn_mat(
             # Processs the weights of the original neural network based
             # on the rand_partition boolean parameter     
             if rand_partition: 
-                partitioned_weights = utils.float_partition(intrinsic_weight, 
+                partitioned_weights = utils._float_partition(intrinsic_weight, 
                                                             len(sources_indexes) * nr_sources_to_use)
                 # Make the idx to use the different partitioned_weights
                 # when connecting sources to targets 
@@ -387,7 +359,7 @@ def from_conn_mat(
                     nr_targets_to_use = int(np.round(nr_targets_to_use))                
             
             if rand_partition:
-                partitioned_weights = utils.float_partition(current_weight, 
+                partitioned_weights = utils._float_partition(current_weight, 
                                                             len(sources_indexes) * nr_targets_to_use)
                 # Make the idx to use the different partitioned_weights
                 # when connecting sources to targets 

@@ -1,4 +1,5 @@
 # Bio2Art
+
 Convert biological neural networks to recurrent neural networks based on the topology dictated by the empirical biological networks.
 
 ![bio_and_art_connectomes](bio_and_art_connectomes.png)
@@ -23,15 +24,21 @@ The constructed artificial recurrent neural network is returned as a ndarray and
 
 # Installation
 
-Download or clone the repository. Open a terminal and change to the corresponding folder. Type:
+Download or clone the repository. It is advisable to create a virtual environment (e.g., with conda) with the Bio2Art/requirements.txt 
+
+Open a terminal and change to the corresponding folder. Type:
 
 ```
 pip install .
 ```
-Note that the Bio2Art only uses numpy (tested with numpy==1.16.2). However, to use the examples (see below), further libraries are needed. Therefore, for executing the examples, create a virtual environment (e.g., with conda) with the requirements enlisted in the requirements.txt file in the "examples" folder.  
+Note that the Bio2Art only uses numpy (tested with numpy=1.16.2). 
+
+Note that to use the examples (see below), further libraries are needed. Therefore, for executing the examples described in section "Examples of use in the context of echo state networks", create a virtual environment (e.g., with conda) with the requirements enlisted in examples/requirements.txt
 
 # Examples
+
 # Basic use
+
 Please see the documentation of the importnet.from_conn_mat function for a detailed description of the parameters used below. The use of the parameters and their impact is highlighted in the following examples.  
 
 Converting the macaque monkey neural network to a recurrent artifical neural network.
@@ -49,14 +56,13 @@ net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
 	 data_name=data_name, 
     path_to_connectome_folder=path_to_connectome_folder,  
     neuron_density=None, 
-    seed_neurons=None, 
     intrinsic_conn=False, 
     target_sparsity=0.1
     )
 ```
-The neuron_density is the recurrent neural network based on the indicated empirical monkey neuronal network. However, since neuron_density=None and seed_neurons=None, net_scaled is exactly the same with net_orig, that is, the exact same empirical monkey neural network. Not very useful. Let's see how we can create something more meaningful and helpful. 
+The neuron_density is the recurrent neural network based on the indicated empirical monkey neuronal network. However, since neuron_density=None, net_scaled is exactly the same with net_orig, that is, the exact same empirical monkey neural network. Not very useful. Let's see how we can create something more meaningful and helpful. 
 
-The neuron_density and seed_neurons parameters can help us scale up the recurrent neural network while we stay faithful to the topology of the empirical neural network (here, the macaque monkey).
+The neuron_density parameter can help us scale up the recurrent neural network while we stay faithful to the topology of the empirical neural network (here, the macaque monkey).
 
 ```
 import numpy as np
@@ -64,10 +70,9 @@ neuron_density=np.zeros(29, dtype=int)
 neuron_density[:] = 10
 
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-    path_to_connectome_folder = path_to_connectome_folder, 
+    path_to_connectome_folder=path_to_connectome_folder, 
     data_name=data_name,
     neuron_density=neuron_density, 
-    seed_neurons=None, 
     intrinsic_conn=False, 
     target_sparsity=0.1
     )
@@ -84,10 +89,9 @@ neuron_density[:] = 10
 neuron_density[4] = 40
 
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-    path_to_connectome_folder = path_to_connectome_folder, 
+    path_to_connectome_folder=path_to_connectome_folder, 
     data_name=data_name,
     neuron_density=neuron_density, 
-    seed_neurons=None, 
     intrinsic_conn=False, 
     target_sparsity=0.1
     )
@@ -102,10 +106,9 @@ If target_sparsity=0.8 as in the example below:
 
 ```
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-    path_to_connectome_folder = path_to_connectome_folder, 
+    path_to_connectome_folder=path_to_connectome_folder, 
     data_name=data_name,
     neuron_density=neuron_density, 
-    seed_neurons=None, 
     intrinsic_conn=False, 
     target_sparsity=0.8
     )
@@ -113,13 +116,13 @@ net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
 then the density of network_scaled becomes higher(=0.529) corresponding to 54160 connections for net_scaled. Note that density of a network is the percentage of existing connections over the number of possible connections (given the shape of the array representing it, that is, network_scaled in this example), including the intrinsic, within-region connections and the self-to-self connections. 
 
 # Intrinsic and self connections
+
 If we want to build a neural network with intrinsic, within-region connections and self-to-self connections, then the intrinsic_conn and keep_diag parameters should be used:
 ```
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-    path_to_connectome_folder = path_to_connectome_folder, 
+    path_to_connectome_folder=path_to_connectome_folder, 
     data_name=data_name,
     neuron_density=neuron_density, 
-    seed_neurons=None, 
     intrinsic_conn=True, 
     target_sparsity=0.8,
     keep_diag=True,
@@ -132,13 +135,12 @@ Note that when the intrinsic_conn=True option is used, an additional parameter t
 Let's see an example:
 ```
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-   path_to_connectome_folder = path_to_connectome_folder, 
+   path_to_connectome_folder=path_to_connectome_folder, 
    data_name=data_name,
    neuron_density=neuron_density, 
-   seed_neurons=None, 
    intrinsic_conn=True, 
    target_sparsity=0.8,
-   target_sparsity_intrinsic = .5,
+   target_sparsity_intrinsic=0.5,
    keep_diag=True
    )
 ```
@@ -149,10 +151,9 @@ When intrinsic_conn=True, the the parameter intrinsic_wei is relevant: intrinsic
 We can change the weight of intrinsic conenctions, including self-to-self connections, with the parameter intrinsic_wei, e.g., intrinsic_wei=0.5 in the example below:
 ```
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-   path_to_connectome_folder = path_to_connectome_folder, 
+   path_to_connectome_folder=path_to_connectome_folder, 
    data_name=data_name,
    neuron_density=neuron_density, 
-   seed_neurons=None, 
    intrinsic_conn=True, 
    target_sparsity=0.8,
    target_sparsity_intrinsic=0.5,
@@ -166,10 +167,9 @@ network_scaled[m,n] = network_original[i,j] / (nr_source_neurons * nr_target_neu
 This introduces less diversity and may impact the amount of diverse transformations that are applied to the input to the network (since many connections from one source neuron to many target neurons has the exact same weight). Therefore, in orderr to introduce more diversity but also construct net_scaled based on the empirical values of the neural network, we can specify rand_partition=True. This has as a result to compute heterogeneous strengths of for the neuron-to-neuron connections as follows: empirical wieight network_original[i,j] will be partitioned in k parts that sum to the original connection weight network_original[i,j], where k = nr_source_neurons * nr_target_neurons, with nr_source_neurons and nr_target_neurons are the nr of neurons in the source i and target areas j as part of network_scaled[i,j]. These k values will be assigned as conenction weights for the k connections between neurons inhabiting regions i and j. Let's see an example:
 ```
 net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-   path_to_connectome_folder = path_to_connectome_folder, 
+   path_to_connectome_folder=path_to_connectome_folder, 
    data_name=data_name,
    neuron_density=neuron_density, 
-   seed_neurons=None, 
    intrinsic_conn=True, 
    target_sparsity=0.8,
    target_sparsity_intrinsic=0.5,
@@ -177,38 +177,9 @@ net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
    rand_partition=True
    )    
 ```
-If seed_neurons is not None, but a positive integer, then the array neuron_density will be scaled such as neuron_density[i]/sum(neuron_density). Subsequently each entry neuron_density, will be multiplied by the seed_neurons integer. Thus, now each region neuron_density[i] contains neuron_density[i]/sum(neuron_density). This is derived from the following relation: neuron_density[i]/sum(neuron_density) * seed_neurons (actually, the ceil of this number, since we cannot have non-integer number of neurons in a region).
+Note that if neuron_density=None, then internally this variable will be set to: neuron_density[i]=1. 
 
-For instance, assuming 10 neurons per region and seed_neurons=100:
-
-```
-neuron_density=np.zeros(29, dtype=int)
-neuron_density[:] = 10
-
-net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-    path_to_connectome_folder = path_to_connectome_folder, 
-    data_name=data_name,
-    neuron_density=neuron_density, 
-    seed_neurons=100, 
-    intrinsic_conn=True, 
-    target_sparsity=0.1
-    )
-```
-The recurrent artifical neural network is now a network (net_scaled) containing in total 116 neurons.
-
-Note that if neuron_density=None, then internally this will be set to: neuron_density[i]=1. Since neuron_density is scaled to the sum(neuron_density), instantiating the artifical recurrent neural network with neuron_density=None will result in the exact same number of neurons (=116) as the example above:  
-
-```
-net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
-    path_to_connectome_folder = path_to_connectome_folder, 
-    data_name=data_name,
-    neuron_density=None, 
-    seed_neurons=100, 
-    intrinsic_conn=True, 
-    target_sparsity=0.1
-    )
-```
-The same syntax and parameters are used for instantiating the artifical recurrent neural network based on the topology of other empirical biological neural networks, such as the mouse:
+The same syntax and parameters are used for instantiating the artifical recurrent neural network based on the topology of other empirical biological neural networks, such as the mouse brain neural network:
 
 ```
 data_name = "Mouse_Ypma_Oh"# the mouse neural network 
@@ -220,16 +191,68 @@ net_orig, net_scaled, region_neuron_ids = bio2art_import.bio2art_from_conn_mat(
     path_to_connectome_folder=path_to_connectome_folder, 
     data_name=data_name,
     neuron_density=neuron_density, 
-    seed_neurons=None, 
     intrinsic_conn=True, 
     target_sparsity=0.1
     )
 ```
 This instantiation results in a recurrent neural network net_scaled that contains 560 neurons (56 regions of the original connectome x 10 neurons per region as we indicated).
 
-In all of the above examples net_orig is a ndarray that corresponds to the biological neural network that was used to construct the artificial neural network. region_neuron_ids is a list of lists. Each list in this list includes integers that are the indexes of the neurons contained within a region. For instance, region_neuron_ids[0] will return the indexes of the neurons in net_scaled that correspond to region 1 in the biological neural network net_orig. See section Utilities to see how the names of each egion can be imported. 
+In all of the above examples net_orig is a ndarray that corresponds to the biological neural network that was used to construct the artificial neural network. region_neuron_ids is a list of lists. Each list in this list includes integers that are the indexes of the neurons contained within a region. For instance, region_neuron_ids[0] will return the indexes of the neurons in net_scaled that correspond to region 1 in the biological neural network net_orig. See section Utilities to see how the names of each region can be imported. 
 
-Note that import_net contains also the function from_list. This function can be used to read a csv file that represents a connectome and output the connectome as ndarray. Not used in the current examples but useful to read neural network data in a csv form.
+Note that importnet contains also the function from_list. This function can be used to read a csv file that represents a connectome and output the connectome as ndarray. Not used in the current examples, but useful to read neural network data in a csv form.
+
+# Utilities
+
+Certain utility functions can be used to extract more information about the neural networks that are prepackaged. Let's see how these ultility functions are used.
+
+# Names of regions/nodes
+
+We can load the names of the regions of the biological neural networks. For instance, if we are working with the marmoset monkey neural network, we can load the names as follows:
+
+```
+from pathlib import Path
+path_to_connectome_folder = Path('/Users/.../Bio2Art/connectomes/')# Replace with the correct path pointign to the prepackaged data
+
+names = bio2art.utils.get_names(path_to_connectome_folder, 'Marmoset_Normalized')
+
+``` 
+names is now a list of str containing the acrobyms of the 55 brain regions of the marmoset brain. 
+
+In the exact same way we can load the names of the rest of data sets.
+
+# Neuron densities of regions/nodes
+
+We can load the neuron densities of each brain region as follows:
+```
+nd = bio2art.utils.get_neuron_density(path_to_connectome_folder, 'Marmoset_Normalized')
+```
+nd is a ndarray of shape (N,) and N is the number of areas in the connectome. Each entry of neuron_density denotes the neuron density (nr of neurons per mm3) for each region/node (see Citations for experimental details).
+
+Note that neuron density measurments are available for the Macaque_Normalized and Marmoset_Normalized datasets and that Macaque_Normalized contains NaN values for some regions (no available empirical data).             
+
+# Scaling neuron densities
+
+Working with the actual neuron densities "as is" can pose computational challenges. For instance, the sum of neuron densities for the marmsoet is 4837703, so the bio-instantiated recurrent neural network would have more than 4 million neurons. To alleviate computational issues and take into account that for certain applications or research questions recurrent networks with this size are not necessary, we can scale the empirical measurements so that we have the desired network size. Two options are available, that is, working with ratios of neuron densities or rank ordered neuron densities. Let's see how it works:
+
+```
+from pathlib import Path
+path_to_connectome_folder = Path('/Users/.../Bio2Art/connectomes/')# Replace with the correct path pointign to the prepackaged data
+
+nd = bio2art.utils.get_neuron_density(path_to_connectome_folder, 'Marmoset_Normalized')
+
+nd_scaled = bio2art.utils.scale_neuron_density(nd, seed_neuron=2, scale_type='ratio')
+``` 
+The resulting nd_scaled is an ndarray that now expresses the nd values as ratios:
+nd_scaled = round((nd[i] / min(nd)) * seed_neuron) where i denotes each of the N regions.  
+So the ratio is the actual neuron density value over the min neuron density value multiplied by seed_neuron. seed_neuron allows us to scale the size of the network by multiplying the nd[i] / min(nd) ratio. 
+
+We can also use the rank of the nd values:
+```
+nd_scaled = bio2art.utils.scale_neuron_density(nd, seed_neuron=2, scale_type='rank')
+```
+In this case only the rank order of the nd values is taken into account, and thus the magnituide of e.g., rank 1 and 4 is ignored. The resulting nd_scaled is simply the rank ordered nd values multiplied by seed_neuron.
+
+You can use the above neuron density or scaled neuron density values as the neuron_density argument in the importnet function for generating a bio-instantiated recurrent neural network (see documentation of importnet).   
 
 # Examples of use in the context of echo state networks
 
@@ -248,11 +271,11 @@ https://github.com/fabridamicelli/echoes
 
 However, any echo state network can be used, since the Bio2Art offers as output a recurrent neural network in the form of a Numpy array that can be pluged-in as the recurrent network in-between Win and Wout in echo state networks.
 
-Note that the examples can be run with the requirements enlisted in requirements.txt.
+Note that the examples can be run with the requirements enlisted in examples/requirements.txt.
 
 # Citations
 
-Apart from explicitly refering to this repository, certain empirical datasets are used as well. Thus, if you use a specific empirical connectome to instantiate a recurrent artifical neural network, please cite the following papers:
+Apart from explicitly refering to this repository, certain empirical datasets are used as well. Thus, if you use a specific empirical neural network to instantiate a recurrent artifical neural network, please cite the appropriate item form the following list papers:
 
 Fly:
 A.-S. Chiang et al. Three-dimensional reconstruction of brain-wide wiring networks in Drosophila at single-cell resolution.Curr. Biol.21,1–11 (2011) https://doi.org/10.1016/j.cub.2010.11.056
@@ -264,7 +287,7 @@ S.W. Oh et al. A mesoscale connectome of the mouse brain. Nature. 508,207–214 
 
 Mouse Gamanut:
 
-R. Gămănuţ et al. The mouse cortical Connectome, characterized by an ultra-dense cortical graph, maintains specificity by distinct connectivity profiles. Neuron. 97, 698-715.e10 https://doi.org/10.1016/j.neuron.2017.12.037
+R. Gămănuţ et al. The mouse cortical connectome, characterized by an ultra-dense cortical graph, maintains specificity by distinct connectivity profiles. Neuron. 97, 698-715.e10 https://doi.org/10.1016/j.neuron.2017.12.037
 
 Macaque monkey:
 
