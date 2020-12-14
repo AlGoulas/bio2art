@@ -275,6 +275,17 @@ Note that the examples can be run with the requirements enlisted in examples/req
 
 # Citations
 
+```
+@misc{echoes,
+  author = {Goulas, Alexandros},
+  title = {bio2art: Convert biological neural networks to recurrent neural networks},
+  year = {2020},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/AlGoulas/Bio2Art}},
+}
+```
+
 Apart from explicitly refering to this repository, certain empirical datasets are used as well. Thus, if you use a specific empirical neural network to instantiate a recurrent artifical neural network, please cite the appropriate item form the following list papers:
 
 Fly:
