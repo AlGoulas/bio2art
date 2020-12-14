@@ -276,7 +276,7 @@ Note that the examples can be run with the requirements enlisted in examples/req
 # Citations
 
 ```
-@misc{echoes,
+@misc{bio2art,
   author = {Goulas, Alexandros},
   title = {bio2art: Convert biological neural networks to recurrent neural networks},
   year = {2020},
