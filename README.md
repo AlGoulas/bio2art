@@ -289,9 +289,11 @@ Note that the examples can be run with the requirements enlisted in examples/req
 Apart from explicitly refering to this repository, certain empirical datasets are used as well. Thus, if you use a specific empirical neural network to instantiate a recurrent artifical neural network, please cite the appropriate item form the following list papers:
 
 Fly:
+
 A.-S. Chiang et al. Three-dimensional reconstruction of brain-wide wiring networks in Drosophila at single-cell resolution.Curr. Biol.21,1–11 (2011) https://doi.org/10.1016/j.cub.2010.11.056
 
 Mouse Ypma Oh:
+
 M. Rubinov, R. J. F. Ypma, et al. Wiring cost and topological participation of the mouse brain connectome.Proc. Natl. Acad. Sci. U.S.A. 112,10032–10037 (2015). https://doi.org/10.1073/pnas.1420315112
 
 S.W. Oh et al. A mesoscale connectome of the mouse brain. Nature. 508,207–214 (2014). http://dx.doi.org/10.1038/nature13186
