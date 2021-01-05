@@ -3,7 +3,7 @@
 from setuptools import setup
 from setuptools import find_packages
 
-setup(name='Bio2Art',
+setup(name='bio2art',
       version='0.1',
       description='Convert biological to artifial neural networks',
       author='Alexandros Goulas',
