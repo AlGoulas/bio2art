@@ -268,7 +268,6 @@ net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
     data_name = data_name, 
     path_to_connectome_folder = path_to_connectome_folder, 
     neuron_density = neuron_density, 
-    seed_neurons = None, 
     target_sparsity = .1,
     intrinsic_conn = True, 
     target_sparsity_intrinsic = .5,
