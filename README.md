@@ -288,6 +288,8 @@ Note that the examples can be run with the requirements enlisted in examples/req
 
 # Citations
 
+## Repository and paper
+
 ```
 @misc{bio2art,
   author = {Goulas, Alexandros},
@@ -297,9 +299,23 @@ Note that the examples can be run with the requirements enlisted in examples/req
   journal = {GitHub repository},
   howpublished = {\url{https://github.com/AlGoulas/bio2art}},
 }
+
+@article {Goulas2021,
+	author = {Goulas, Alexandros and Damicelli, Fabrizio and Hilgetag, Claus C},
+	title = {Bio-instantiated recurrent neural networks},
+	elocation-id = {2021.01.22.427744},
+	year = {2021},
+	doi = {10.1101/2021.01.22.427744},
+	publisher = {Cold Spring Harbor Laboratory},
+	URL = {https://www.biorxiv.org/content/early/2021/01/23/2021.01.22.427744},
+	eprint = {https://www.biorxiv.org/content/early/2021/01/23/2021.01.22.427744.full.pdf},
+	journal = {bioRxiv}
+}
 ```
 
-Apart from explicitly refering to this repository, certain empirical datasets are used as well. Thus, if you use a specific empirical neural network to instantiate a recurrent artifical neural network, please cite the appropriate item from the following list papers:
+## Citing datasets
+
+Apart from explicitly refering to this repository and paper, certain empirical datasets are used as well. Thus, if you use a specific empirical neural network to instantiate a recurrent artifical neural network, please cite the appropriate item from the following list papers:
 
 Fly:
 
