@@ -74,7 +74,7 @@ def threshold_matrix(X, desired_density):
 # ND_areas = np.random.choice([10, 8, 1], p=[.1, .1, .8], size=(57,))
 
 #Specify here the folder where your connectomes are contained 
-path_to_connectome_folder = Path('/Users/.../Bio2Art/connectomes/')#change to the folder where the Bio2Art was installed
+path_to_connectome_folder = Path('/Users/alexandrosgoulas/Data/work-stuff/python-code/packages/bio2art/connectomes/')#change to the folder where the Bio2Art was installed
 
 # The neural network that we would like to use
 data_name = 'Marmoset_Normalized'
@@ -86,7 +86,6 @@ net_orig, net_scaled, region_neuron_ids = importnet.from_conn_mat(
     data_name = data_name, 
     path_to_connectome_folder = path_to_connectome_folder, 
     neuron_density = neuron_density, 
-    seed_neurons = None, 
     target_sparsity = .1,
     intrinsic_conn = True, 
     target_sparsity_intrinsic = .5,
