@@ -13,7 +13,6 @@ from bio2art import utils
 # Function that simply reads a csv file and returns the matrix that constitutes
 # the neuronal network
 def from_list(path_to_connectome_folder, data_name):
-
     """
     Generate matrix W from scv file
     
