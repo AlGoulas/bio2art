@@ -267,25 +267,6 @@ In this case only the rank order of the nd values is taken into account, and thu
 
 You can use the above neuron density or scaled neuron density values as the neuron_density argument in the importnet function for generating a bio-instantiated recurrent neural network (see documentation of importnet).   
 
-# Examples of use in the context of echo state networks
-
-Two examples are included to showcase the use of the bio2art conversion in an actual context. Both example focus on a "memory" capacity of the network (both in the "examples" folder).
-
-```bio2art_reservoire_lag_memory.py```
-
-This example uses an echo state network with random topology and one with a bioinstantiated topology. Given an input sequence, the task is to predict the Nth lag of the sequence.
-
-```bio2art_reservoire_sequence_memory.py```
-
-This example uses an echo state network with random topology and one with a bioinstantiated topology. The task is a "working memory" task, that is, the network has to memorize a sequence of N numbers and after a "cue" to replay this sequence.
-
-Note that the above examples use [this echo state network](https://github.com/fabridamicelli/echoes)
-implementation.
-
-However, any echo state network can be used, since the bio2art offers as output a recurrent neural network in the form of a Numpy array that can be pluged-in as the recurrent network in-between Win and Wout in echo state networks.
-
-Note that the examples can be run with the requirements enlisted in examples/requirements.txt.
-
 # Citations
 
 ## Repository and paper
@@ -300,16 +281,16 @@ Note that the examples can be run with the requirements enlisted in examples/req
   howpublished = {\url{https://github.com/AlGoulas/bio2art}},
 }
 
-@article {Goulas2021,
-	author = {Goulas, Alexandros and Damicelli, Fabrizio and Hilgetag, Claus C},
-	title = {Bio-instantiated recurrent neural networks},
-	elocation-id = {2021.01.22.427744},
-	year = {2021},
-	doi = {10.1101/2021.01.22.427744},
-	publisher = {Cold Spring Harbor Laboratory},
-	URL = {https://www.biorxiv.org/content/early/2021/01/23/2021.01.22.427744},
-	eprint = {https://www.biorxiv.org/content/early/2021/01/23/2021.01.22.427744.full.pdf},
-	journal = {bioRxiv}
+title = {Bio-instantiated recurrent neural networks: Integrating neurobiology-based network topology in artificial networks},
+journal = {Neural Networks},
+volume = {142},
+pages = {608-618},
+year = {2021},
+issn = {0893-6080},
+doi = {https://doi.org/10.1016/j.neunet.2021.07.011},
+url = {https://www.sciencedirect.com/science/article/pii/S0893608021002744},
+author = {Alexandros Goulas and Fabrizio Damicelli and Claus C. Hilgetag},
+keywords = {Network topology, Connectomes, Artificial networks}
 }
 ```
 
