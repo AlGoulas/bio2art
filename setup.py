@@ -13,5 +13,6 @@ setup(name='bio2art',
           'Programming Language :: Python :: 3.7.3',
       ],
       packages=find_packages(),
-      include_package_data=True
-      )
+      include_package_data=True,
+      package_data={'': ['connectomes/*.npy', 'connectomes/*.lst']},
+)

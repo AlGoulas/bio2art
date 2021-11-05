@@ -2,20 +2,17 @@
 # -*- coding: utf-8 -*-
 import pickle 
 import numpy as np
+from pathlib import Path
+import pkg_resources
 import random
 
 # Load the names of the regions of the indicated connectome
-def get_names(path_to_connectome_folder, data_name):
+def get_names(data_name, path_to_connectome_folder = None):
     '''
     Load the names of the regions of the indicated dataset
     
     Input
     -----
-    path_to_connectome_folder: object of class pathlib.PosixPath 
-        The path to the empirical neural network data (connectomes). 
-        The path must be a passed from the Path subclasss of 
-        pathlib: path_to_connectome_folder = Path('path_to_desired_dataset'). 
-    
     data_name: str 
         String denoting the name of the neuronal network would like to use. 
         Currently available:
@@ -26,6 +23,12 @@ def get_names(path_to_connectome_folder, data_name):
         'Marmoset_Normalized'            55x55
         'Mouse_Gamanut_Normalized'       19x19
         'Mouse_Ypma_Oh'                  56x56
+        
+    path_to_connectome_folder: (optional), default None, object of class pathlib.PosixPath 
+        The path to the empirical neural network data (connectomes). 
+        The path must be a passed from the Path subclasss of 
+        pathlib: path_to_connectome_folder = Path('path_to_desired_dataset'). 
+        If not specified, the path to the packaged data will be used.
      
     Output
     ------
@@ -36,6 +39,9 @@ def get_names(path_to_connectome_folder, data_name):
     Note: Pickle is used for loading the names
     
     '''
+    if path_to_connectome_folder is None:
+        path_to_connectome_folder = pkg_resources.resource_filename('bio2art', 'connectomes/')
+        path_to_connectome_folder = Path(path_to_connectome_folder)
     data_name = 'Names_' + data_name + '.lst' # Prefix and suffix for the file
     file_to_open = path_to_connectome_folder / data_name
     with open(file_to_open, 'rb') as fp: 
@@ -44,23 +50,24 @@ def get_names(path_to_connectome_folder, data_name):
     return names
  
 #  Load the neuron density of the regions of the indicated dataset
-def get_neuron_density(path_to_connectome_folder, data_name):
+def get_neuron_density(data_name, path_to_connectome_folder = None):
     '''
     Load the neuron density of the regions of the indicated dataset
     
     Input
     -----
-    path_to_connectome_folder: object of class pathlib.PosixPath 
-        The path to the empirical neural network data (connectomes). 
-        The path must be a passed from the Path subclasss of 
-        pathlib: path_to_connectome_folder = Path('path_to_desired_dataset'). 
-    
     data_name: str 
         String denoting the name of the neuronal network would like to use. 
         Currently available:
                   
         'Macaque_Normalized'             
-        'Marmoset_Normalized'            
+        'Marmoset_Normalized'  
+        
+    path_to_connectome_folder: (optional), default None, object of class pathlib.PosixPath 
+        The path to the empirical neural network data (connectomes). 
+        The path must be a passed from the Path subclasss of 
+        pathlib: path_to_connectome_folder = Path('path_to_desired_dataset'). 
+        If not specified, the path to the packaged data will be used.          
 
     Output
     ------
@@ -70,7 +77,9 @@ def get_neuron_density(path_to_connectome_folder, data_name):
         for each region/node.
     
     '''
-    
+    if path_to_connectome_folder is None:
+        path_to_connectome_folder = pkg_resources.resource_filename('bio2art', 'connectomes/')
+        path_to_connectome_folder = Path(path_to_connectome_folder)
     file_conn = 'ND_' + data_name + '.npy' # Prefix and suffix for the file
     file_to_open = path_to_connectome_folder / file_conn
     neuron_density = np.load(file_to_open)
@@ -79,8 +88,8 @@ def get_neuron_density(path_to_connectome_folder, data_name):
 
 #  Construct a scaled neuron_density array based on the seed_neuron
 def scale_neuron_density(neuron_density, 
-                         seed_neuron=1,
-                         scale_type='rank'):
+                         seed_neuron = 1,
+                         scale_type = 'rank'):
     '''
     Construct a scaled neuron_density ndarray based on rank ordered or ratios 
     of neuron_density values and seed_neuron 
