@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import csv
 import numpy as np
+from pathlib import Path
+import pkg_resources
 import random
 
 from bio2art import utils
@@ -121,11 +123,12 @@ def from_conn_mat(
         'Mouse_Gamanut_Normalized'       19x19
         'Mouse_Ypma_Oh'                  56x56
    
-    path_to_connectome_folder: object of class pathlib.PosixPath 
+    path_to_connectome_folder: (optional), default None, object of class pathlib.PosixPath 
         The path to the empirical neural network data (connectomes). 
         The path must be a passed from the Path subclasss of 
         pathlib: path_to_connectome_folder = Path('path_to_desired_dataset'). 
-
+        If not specified, the path to the packaged data will be used.
+        
     neuron_density: ndarray of positive int with shape (N,), default None 
         N corresponds to the actual biological neural network (see data_name). 
         Each entry of  neuron_density[i] is denoting the number of neurons 
@@ -195,6 +198,9 @@ def from_conn_mat(
         network_scaled[region_neuron_ids[1], region_neuron_ids[1]]
     
     """
+    if path_to_connectome_folder is None:
+        path_to_connectome_folder = pkg_resources.resource_filename('bio2art', 'connectomes/')
+        path_to_connectome_folder = Path(path_to_connectome_folder)
     file_conn = 'C_' + data_name + '.npy' # Prefix and suffix for the file
     file_to_open = path_to_connectome_folder / file_conn
     
